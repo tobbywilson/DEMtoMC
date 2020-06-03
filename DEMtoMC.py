@@ -5,34 +5,35 @@ Created on Tue Jun  2 17:55:53 2020
 @author: Toby
 """
 
+#Data import and manipulation
+import numpy as np
+import pandas as pd
 
-import numpy
-import os
-import pandas
-#from osgeo import gdal
+#Data visualisation
+import matplotlib.pyplot as plt
 
-import tkinter as tk
 
-class Application(tk.Frame):
-    def __init__(self, master=None):
-        super().__init__(master)
-        self.master = master
-        self.pack()
-        self.create_widgets()
+#GUI
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk as gtk
 
-    def create_widgets(self):
-        self.hi_there = tk.Button(self)
-        self.hi_there["text"] = "Hello World\n(click me)"
-        self.hi_there["command"] = self.say_hi
-        self.hi_there.pack(side="top")
 
-        self.quit = tk.Button(self, text="QUIT", fg="red",
-                              command=self.master.destroy)
-        self.quit.pack(side="bottom")
+def flex_round(number,quantisation=0.5):
+    return round(number*(1/quantisation))/(1/quantisation)
 
-    def say_hi(self):
-        print("hi there, everyone!")
 
-root = tk.Tk()
-app = Application(master=root)
-app.mainloop()
+win = gtk.Window()
+win.connect("destroy", gtk.main_quit)
+
+
+win.show_all()
+
+data = pd.read_csv(file,delim_whitespace=True,header=None,skiprows=6)
+
+x_len = len(data)
+y_len = len(data[0])
+
+Data = data.applymap(flex_round)
+
+plt.imshow(Data)
