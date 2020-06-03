@@ -14,20 +14,18 @@ import matplotlib.pyplot as plt
 
 
 #GUI
-import gi
-gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk as gtk
+import sys
+from PySide2.QtWidgets import QApplication, QLabel
 
 
 def flex_round(number,quantisation=0.5):
     return round(number*(1/quantisation))/(1/quantisation)
 
 
-win = gtk.Window()
-win.connect("destroy", gtk.main_quit)
 
 
-win.show_all()
+
+
 
 data = pd.read_csv(file,delim_whitespace=True,header=None,skiprows=6)
 
