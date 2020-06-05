@@ -42,7 +42,7 @@ def flex_round(number,quantisation=0.5):
 
 blockList = [
 'stone',
-'grass',
+'grass_block',
 'concrete',
 'dirt',
 'sand',
@@ -54,6 +54,7 @@ blockList = [
 'bricks',
 'bedrock',
 'soul_sand',
+'grass',
 'water'
 ]
 
@@ -119,7 +120,7 @@ class win(QtWidgets.QWidget):
         logging.getLogger().addHandler(self.executeLog)
         logging.getLogger().setLevel(logging.DEBUG)
 
-        self.fileText = QtWidgets.QLabel("Choose a DEM file. Accepted formats: .asc")
+        self.fileText = QtWidgets.QLabel("Choose a DEM file.")
 
 
         global blockIn
@@ -159,11 +160,11 @@ class win(QtWidgets.QWidget):
         waterLevelIn.setValue(1)
         waterLevelIn.setRange(0,256)
 
-        global skirtHeightIn
-        skirtHeightIn = QtWidgets.QSpinBox()
-        skirtHeightLabel = QtWidgets.QLabel("Skirt Height")
-        skirtHeightIn.setValue(5)
-        skirtHeightIn.setRange(-9000,256)
+        global baselineHeightIn
+        baselineHeightIn = QtWidgets.QSpinBox()
+        baselineHeightLabel = QtWidgets.QLabel("Baseline Height")
+        baselineHeightIn.setValue(5)
+        baselineHeightIn.setRange(-9000,256)
 
         self.open = QtWidgets.QPushButton("Open File")
         self.run = QtWidgets.QPushButton("Run")
@@ -182,8 +183,8 @@ class win(QtWidgets.QWidget):
 
         self.settingsLayout.addWidget(waterLabel,0,2)
         self.settingsLayout.addWidget(waterLevelIn,0,3)
-        self.settingsLayout.addWidget(skirtHeightLabel,1,2)
-        self.settingsLayout.addWidget(skirtHeightIn,1,3)
+        self.settingsLayout.addWidget(baselineHeightLabel,1,2)
+        self.settingsLayout.addWidget(baselineHeightIn,1,3)
 
         self.settingsLayout.addWidget(blockLabel,3,0)
         self.settingsLayout.addWidget(blockIn,3,1)
@@ -216,7 +217,7 @@ class win(QtWidgets.QWidget):
     def openFile(self):
         global file
         fileOpenDialog = QtWidgets.QFileDialog(self)
-        file = fileOpenDialog.getOpenFileName(self,"Open File","","ASCII Grid Files (*.asc);;Any File (*)")[0]
+        file = fileOpenDialog.getOpenFileName(self,"Open File","","GDAL Raster Formats (*.asc *.tif *.tiff *.adf *.ACE2 *.gen *.thf *.arg *.bsb *.bt *.ctg *.dds *.dimap *.doq1 *.doq2 *.e00grid *.hdr *.eir *.fits *.grd *.gxf *.ida *.mpr *.isce *.mem *.kro *.gis *.lan *.mff *.ndf *.gmt *.aux *.png *.pgm *.slc *.int *.gri *.sdat *.sdts *.sgi *.snodas *.hgt *.xpm *.gff *.zmap);;Any File (*)")[0]
         if file == "":
             logging.info("No File Chosen. Please Choose a File")
         else:
@@ -234,8 +235,8 @@ class win(QtWidgets.QWidget):
         logging.info("Setting Parameters")
 
         waterLevel = waterLevelIn.value()
-        skirtHeight = skirtHeightIn.value()
-        waterHeight = waterLevel + skirtHeight
+        baselineHeight = baselineHeightIn.value()
+        waterHeight = waterLevel + baselineHeight
         scaleH = scaleHIn.value()
         scaleV = scaleVIn.value()
         blockName = blockIn.currentText()
@@ -250,16 +251,14 @@ class win(QtWidgets.QWidget):
         logging.info("Horizontal Scale: {}\n \
         Vertical Scale: {}\n \
         Water Level: {}\n \
-        Skirt Height: {}\n \
+        Baseline Height: {}\n \
         Main Block: {}\n \
         Top Block: {}\n \
         Half Block: {}\n \
-        Using Half Blocks? {}".format(scaleH,scaleV,waterLevel,skirtHeight,blockName,topBlockName,halfBlockTypeName,half_blocks))
+        Using Half Blocks? {}".format(scaleH,scaleV,waterLevel,baselineHeight,blockName,topBlockName,halfBlockTypeName,half_blocks))
 
         logging.info("Importing Data")
-        temp = open("temp.asc", "w")
-        temp.write("ncols        1\nnrows        1\nxllcorner    0\nyllcorner    0\ncellsize     1.000000000000\nNODATA_value  -9999\n0")
-        temp.close()
+
         global dem
         demIn = gdal.Open(file)
         dem = demIn.ReadAsArray()
@@ -274,7 +273,7 @@ class win(QtWidgets.QWidget):
             for n in range(int(len(dem[:,0])/scaleH)):
                 row=[]
                 for m in range(int(len(dem[0,:])/scaleH)):
-                    row.append(dem[n*scaleH:n*scaleH+scaleH,m*scaleH:m*scaleH+scaleH].max())
+                    row.append(dem[m*scaleH:m*scaleH+scaleH,n*scaleH:n*scaleH+scaleH].max())
                 dataLists.append(row)
         else:
             dataLists = dem
@@ -305,8 +304,8 @@ class win(QtWidgets.QWidget):
         x_len = len(Data)
         z_len = len(Data.iloc[0,])
 
-        logging.info("x size:\n \
-                        z size:".format(x_len,z_len))
+        logging.info("x size:{}\n \
+                        z size:{}".format(x_len,z_len))
 
         logging.info("Calculating number of regions required")
 
@@ -320,10 +319,7 @@ class win(QtWidgets.QWidget):
 
                 logging.info("Creating Minecraft Region: {}, {}".format(xRegion,zRegion))
 
-
-
                 region = anvil.EmptyRegion(xRegion,zRegion)
-
 
                 logging.info("Region: {}, {}".format(xRegion,zRegion))
 
@@ -331,7 +327,7 @@ class win(QtWidgets.QWidget):
                     for Regionz in range(min(512,z_len-(zRegion)*512)):
                         x = Regionx + xRegion*512
                         z = Regionz + zRegion*512
-                        yRange = int(Data.iloc[x,z]+skirtHeight)
+                        yRange = int(Data.iloc[x,z]+baselineHeight)
                         if (x%16 == 0 and z%16 == 0):
                             logging.info('Current Chunk: {},~,{}'.format(int(x/16),int(z/16)))
                         if Data.iloc[x,z] <= waterLevel:
@@ -379,6 +375,10 @@ class win(QtWidgets.QWidget):
                 region.save('r.{}.{}.mca'.format(xRegion,zRegion))
 
         logging.info("Done")
+        dem = None
+        data = None
+        dataLists = None
+        Data = None
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
