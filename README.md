@@ -29,6 +29,8 @@ Top Block: the block used as the top block in a stack, except where that stack i
 Use Half Blocks: determines whether the nearest half integer or nearest integer is used as the stack height.
 Half Block Type: the block to be used as the half block, when "Use half blocks" is checked.
 
-Add Forest: Whether trees should be added to the DEM
-Forest Frequency: how often a tree should be added. On average there will be one tree in this many blocks.
+Add Forest: Whether trees (as saplings) should be added to the DEM
+Forest Frequency: how often a tree should be added. On average there will be one tree in this many blocks (excluding slabs)
+Use Large Trees: whether large versions of trees should be used.
+Large Tree Frequency: how often large trees should be used (e.g. if the value is 25, one in every 25 spruce and jungle trees will be attempt the be large). If the appropriate terrain is not available, the small version will be used.
 Tree Type(s): the tree types available. Multiple types can be selected. If no type is selected, oak will be used. The trees are randomly selected with equal probability from the available types. If a dark_oak tree is selected, but the location is not valid for a dark_oak tree (i.e. there is a four block square with the same y value), an oak tree will be used instead.

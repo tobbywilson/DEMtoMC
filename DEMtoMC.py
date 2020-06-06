@@ -194,6 +194,16 @@ class win(QtWidgets.QWidget):
         treeTypesIn.addItems(tree_list)
         treeTypesIn.setSelectionMode(QtWidgets.QListWidget.MultiSelection)
 
+        global largeTreesIn
+        largeTreesIn = QtWidgets.QCheckBox()
+        largeTreesLabel = QtWidgets.QLabel("Use Large Trees")
+
+        global largeTreesFreqIn
+        largeTreesFreqIn = QtWidgets.QSpinBox()
+        largeTreesFreqLabel = QtWidgets.QLabel("Large Trees Frequency")
+        largeTreesFreqIn.setValue(25)
+        largeTreesFreqIn.setMinimum(1)
+
         self.open = QtWidgets.QPushButton("Open File")
         self.out = QtWidgets.QPushButton("Select Output Directory")
         self.run = QtWidgets.QPushButton("Run")
@@ -234,8 +244,12 @@ class win(QtWidgets.QWidget):
         self.forestLayout.addWidget(forestCheckIn,0,1)
         self.forestLayout.addWidget(forestFreqLabel,0,2)
         self.forestLayout.addWidget(forestFreqIn,0,3)
-        self.forestLayout.addWidget(treeTypesLabel,1,0)
-        self.forestLayout.addWidget(treeTypesIn,2,0,1,4)
+        self.forestLayout.addWidget(largeTreesLabel,1,0)
+        self.forestLayout.addWidget(largeTreesIn,1,1)
+        self.forestLayout.addWidget(largeTreesFreqLabel,1,2)
+        self.forestLayout.addWidget(largeTreesFreqIn,1,3)
+        self.forestLayout.addWidget(treeTypesLabel,2,0)
+        self.forestLayout.addWidget(treeTypesIn,3,0,1,4)
 
         self.forestBox.setLayout(self.forestLayout)
         self.settingsLayout.addWidget(self.forestBox,5,0,1,4)
@@ -311,6 +325,8 @@ class win(QtWidgets.QWidget):
         forest = forestCheckIn.isChecked()
         forestFreq = forestFreqIn.value()
         treeTypes = treeTypesIn.selectedItems()
+        largeTrees = largeTreesIn.isChecked()
+        largeTreesFreq = largeTreesFreqIn.value()
 
         if half_blocks:
             quant = 0.5
@@ -424,7 +440,7 @@ class win(QtWidgets.QWidget):
                                     region.set_block(topBlock, x, y, z)
                                     if random.randrange(forestFreq) == 0 and forest:
                                         tree = random.choice(treeTypes).text()
-                                        if tree == 'dark_oak' or ((tree == 'jungle' or tree == 'spruce') and random.randrange(10) == 0):
+                                        if tree == 'dark_oak' or ((tree == 'jungle' or tree == 'spruce') and random.randrange(largeTreesFreq) == 0 and largeTrees):
                                             if Data.iloc[x+1,z] == Data.iloc[x,z] and Data.iloc[x,z+1] == Data.iloc[x,z] and Data.iloc[x+1,z+1] == Data.iloc[x,z]:
                                                 for x,z in zip([x,x,x+1,x+1],[z,z+1,z,z+1]):
                                                     region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
