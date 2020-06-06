@@ -34,3 +34,7 @@ The script accepts any GDAL recognised raster format.
 **Use Large Trees (default: False):** whether large versions of trees should be used.  
 **Large Tree Frequency (default: 25):** how often large trees should be used (e.g. if the value is 25, one in every 25 spruce and jungle trees will be attempt the be large). If the appropriate terrain is not available, the small version will be used.  
 **Tree Type(s) (default: oak):** the tree types available. Multiple types can be selected. If no type is selected, oak will be used. The trees are randomly selected with equal probability from the available types. If a dark_oak tree is selected, but the location is not valid for a dark_oak tree (i.e. there is a four block square with the same y value), an oak tree will be used instead.
+
+
+## License
+This software is made available under the GNU LGPL 3.0 License.
