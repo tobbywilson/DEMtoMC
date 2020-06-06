@@ -7,13 +7,6 @@ Created on Tue Jun  2 17:55:53 2020
 
 import pip
 
-def check_import(package):
-    try:
-        import package as name
-    except ImportError:
-        install(package)
-        import  package
-
 #Data import and manipulation
 import numpy as np
 import pandas as pd
@@ -101,24 +94,24 @@ class win(QtWidgets.QWidget):
         vbox.addWidget(self.messagesBox)
         vbox.addWidget(self.settingsBox)
         vbox.addWidget(self.buttonBox)
-        vbox.addWidget(self.logBox)
+        #vbox.addWidget(self.logBox)
         self.setLayout(vbox)
 
     def createGridLayout(self):
         self.buttonBox = QtWidgets.QGroupBox("")
         self.settingsBox = QtWidgets.QGroupBox("Settings")
         self.messagesBox = QtWidgets.QGroupBox("File")
-        self.logBox = QtWidgets.QGroupBox("Execution Log")
+        #self.logBox = QtWidgets.QGroupBox("Execution Log")
 
         self.buttonLayout = QtWidgets.QHBoxLayout()
         self.settingsLayout = QtWidgets.QGridLayout()
         self.messagesLayout = QtWidgets.QVBoxLayout()
-        self.logLayout = QtWidgets.QVBoxLayout()
+        #self.logLayout = QtWidgets.QVBoxLayout()
 
-        self.executeLog = QTextEditLogger(self)
-        self.executeLog.setFormatter(logFormat)
-        logging.getLogger().addHandler(self.executeLog)
-        logging.getLogger().setLevel(logging.DEBUG)
+        #self.executeLog = QTextEditLogger(self)
+        #self.executeLog.setFormatter(logFormat)
+        #logging.getLogger().addHandler(self.executeLog)
+        #logging.getLogger().setLevel(logging.DEBUG)
 
         self.fileText = QtWidgets.QLabel("Choose a DEM file.")
 
@@ -204,8 +197,8 @@ class win(QtWidgets.QWidget):
 
         self.buttonBox.setLayout(self.buttonLayout)
 
-        self.logLayout.addWidget(self.executeLog.logger)
-        self.logBox.setLayout(self.logLayout)
+        #self.logLayout.addWidget(self.executeLog.logger)
+        #self.logBox.setLayout(self.logLayout)
 
         self.closeWin.clicked.connect(self.close)
         self.run.clicked.connect(self.execute)
@@ -227,10 +220,10 @@ class win(QtWidgets.QWidget):
 
     def execute(self):
 
-        self.executeLog = QTextEditLogger(self)
-        self.executeLog.setFormatter(logFormat)
-        logging.getLogger().addHandler(self.executeLog)
-        logging.getLogger().setLevel(logging.DEBUG)
+        #self.executeLog = QTextEditLogger(self)
+        #self.executeLog.setFormatter(logFormat)
+        #logging.getLogger().addHandler(self.executeLog)
+        #logging.getLogger().setLevel(logging.DEBUG)
 
         logging.info("Setting Parameters")
 
@@ -259,9 +252,11 @@ class win(QtWidgets.QWidget):
 
         logging.info("Importing Data")
 
-        global dem
         demIn = gdal.Open(file)
-        dem = demIn.ReadAsArray()
+        dem = np.rot90(np.flip(demIn.ReadAsArray(),1))
+
+
+        del demIn
 
         logging.info("dem:\n{}".format(dem))
 
@@ -273,12 +268,13 @@ class win(QtWidgets.QWidget):
             for n in range(int(len(dem[:,0])/scaleH)):
                 row=[]
                 for m in range(int(len(dem[0,:])/scaleH)):
-                    row.append(dem[m*scaleH:m*scaleH+scaleH,n*scaleH:n*scaleH+scaleH].max())
+                    row.append(dem[n*scaleH:n*scaleH+scaleH,m*scaleH:m*scaleH+scaleH].max())
                 dataLists.append(row)
         else:
             dataLists = dem
 
-        global data
+        del dem
+
         data = pd.DataFrame(dataLists)
 
         logging.info("Scaling Vertically")
@@ -294,15 +290,17 @@ class win(QtWidgets.QWidget):
 
         logging.info("Rounding elevations to nearest half metre")
 
+        del data
 
         global Data
         Data = dataVScaled.applymap(flex_round)
 
+        del dataVScaled
 
         logging.info("Finding DEM Size")
 
-        x_len = len(Data)
-        z_len = len(Data.iloc[0,])
+        x_len = len(Data.iloc[:,0])
+        z_len = len(Data.iloc[0,:])
 
         logging.info("x size:{}\n \
                         z size:{}".format(x_len,z_len))
@@ -330,7 +328,9 @@ class win(QtWidgets.QWidget):
                         yRange = int(Data.iloc[x,z]+baselineHeight)
                         if (x%16 == 0 and z%16 == 0):
                             logging.info('Current Chunk: {},~,{}'.format(int(x/16),int(z/16)))
-                        if Data.iloc[x,z] <= waterLevel:
+                        if Data.iloc[x,z] == -9999:
+                            pass
+                        elif Data.iloc[x,z] <= waterLevel:
                             region.set_block(bedrock, x, 0, z)
                             for y in range(1,waterHeight):
                                 region.set_block(water, x, y, z)
@@ -353,32 +353,31 @@ class win(QtWidgets.QWidget):
                                 else:
                                     region.set_block(block, x, y, z)
                                     region.set_block(halfBlock, x, yRange, z)
-                if xRegion == xRegions - 1 or zRegion == zRegions - 1:
-                    if x_len%512 != 0:
-                        for x in range(x_len,xRegions*512):
-                            for z in range((zRegion)*512,(zRegion+1)*512):
-                                if (x%16 == 0 and z%16 == 0):
-                                    logging.info('Current Chunk: {},~,{}'.format(int(x/16),int(z/16)))
-                                region.set_block(bedrock, x, 0, z)
-                                for y in range(1,waterHeight):
-                                    region.set_block(water, x, y, z)
-                    if z_len%512 !=0:
-                        for z in range(z_len,zRegions*512):
-                            for x in range((xRegion)*512,(xRegion+1*512)):
-                                if (x%16 == 0 and z%16 == 0):
-                                    logging.info('Current Chunk: {},~,{}'.format(int(x/16),int(z/16)))
-                                region.set_block(bedrock, x, 0, z)
-                                for y in range(1,waterHeight):
-                                    region.set_block(water, x, y, z)
+                #if xRegion == xRegions - 1 or zRegion == zRegions - 1:
+                #    if x_len%512 != 0:
+                #        for x in range(x_len,xRegions*512):
+                #            for z in range((zRegion)*512,(zRegion+1)*512):
+                #                if (x%16 == 0 and z%16 == 0):
+                #                    logging.info('Current Chunk: {},~,{}'.format(int(x/16),int(z/16)))
+                #                region.set_block(bedrock, x, 0, z)
+                #                for y in range(1,waterHeight):
+                #                    region.set_block(water, x, y, z)
+                #    if z_len%512 !=0:
+                #        for z in range(z_len,zRegions*512):
+                #            for x in range((xRegion)*512,(xRegion+1)*512):
+                #                if (x%16 == 0 and z%16 == 0):
+                #                    logging.info('Current Chunk: {},~,{}'.format(int(x/16),int(z/16)))
+                #                region.set_block(bedrock, x, 0, z)
+                #                for y in range(1,waterHeight):
+                #                    region.set_block(water, x, y, z)
 
                 logging.info("Saving Minecraft Region: {}, {}".format(xRegion,zRegion))
                 region.save('r.{}.{}.mca'.format(xRegion,zRegion))
+                del region
 
         logging.info("Done")
-        dem = None
-        data = None
-        dataLists = None
-        Data = None
+
+        del Data
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
