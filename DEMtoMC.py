@@ -440,20 +440,37 @@ class win(QtWidgets.QWidget):
                                     region.set_block(topBlock, x, y, z)
                                     if random.randrange(forestFreq) == 0 and forest:
                                         tree = random.choice(treeTypes).text()
-                                        if tree == 'dark_oak' or ((tree == 'jungle' or tree == 'spruce') and random.randrange(largeTreesFreq) == 0 and largeTrees):
-                                            if Data.iloc[x+1,z] == Data.iloc[x,z] and Data.iloc[x,z+1] == Data.iloc[x,z] and Data.iloc[x+1,z+1] == Data.iloc[x,z]:
+                                        if (tree == 'dark_oak' or ((tree == 'jungle' or tree == 'spruce') and random.randrange(largeTreesFreq) == 0 and largeTrees)) and (x != (0 or 511) and z != (0 or 511)):
+
+                                            if x+1 < x_len and z+1 < z_len:
+                                                sqRD = (Data.iloc[x+1,z] and Data.iloc[x,z+1] and Data.iloc[x+1,z+1]) == Data.iloc[x,z]
+                                            else:
+                                                sqRD = False
+                                            if x+1 < x_len:
+                                                sqRU = (Data.iloc[x+1,z] and Data.iloc[x,z-1] and Data.iloc[x+1,z-1]) == Data.iloc[x,z]
+                                            else:
+                                                sqRU = False
+                                            if z+1 < z_len:
+                                                sqLD = (Data.iloc[x-1,z] and Data.iloc[x,z+1] and Data.iloc[x-1,z+1]) == Data.iloc[x,z]
+                                            else:
+                                                sqLD = False
+
+                                            sqLU = (Data.iloc[x-1,z] and Data.iloc[x,z-1] and Data.iloc[x-1,z-1]) == Data.iloc[x,z]
+
+
+                                            if sqRD:
                                                 for x,z in zip([x,x,x+1,x+1],[z,z+1,z,z+1]):
                                                     region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
                                                     #logging.info(tree+' large')
-                                            elif Data.iloc[x-1,z] == Data.iloc[x,z] and Data.iloc[x,z+1] == Data.iloc[x,z] and Data.iloc[x-1,z+1] == Data.iloc[x,z]:
+                                            elif sqLD:
                                                 for x,z in zip([x,x,x-1,x-1],[z,z+1,z,z+1]):
                                                     region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
                                                     #logging.info(tree+' large')
-                                            elif Data.iloc[x-1,z] == Data.iloc[x,z] and Data.iloc[x,z-1] == Data.iloc[x,z] and Data.iloc[x-1,z-1] == Data.iloc[x,z]:
+                                            elif sqLU:
                                                 for x,z in zip([x,x,x-1,x-1],[z,z-1,z,z-1]):
                                                     region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
                                                     #logging.info(tree+' large')
-                                            elif Data.iloc[x+1,z] == Data.iloc[x,z] and Data.iloc[x,z-1] == Data.iloc[x,z] and Data.iloc[x+1,z-1] == Data.iloc[x,z]:
+                                            elif sqRU:
                                                 for x,z in zip([x,x,x+1,x+1],[z,z-1,z,z-1]):
                                                     region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
                                                     #logging.info(tree+' large')
