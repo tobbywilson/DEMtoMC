@@ -101,7 +101,7 @@ class win(QtWidgets.QWidget):
 
         self.threadpool = QtCore.QThreadPool()
 
-        self.setWindowTitle('DEM to Minecraft')
+        self.setWindowTitle('DEMtoMC')
         self.setGeometry(300,200,500,300)
 
         self.createGridLayout()
@@ -423,7 +423,7 @@ class win(QtWidgets.QWidget):
                         z = Regionz + zRegion*512
                         yRange = int(Data.iloc[x,z]+baselineHeight)
                         if z%256 == 0:
-                            logging.info('Current Rows: {} to {}, Region: {}, {}'.format(z,min(z+255,z_len),xRegion,zRegion))
+                            logging.info('Current Rows: {} to {} of {}, Column: {} of {}, Region: {}, {}'.format(z,min(z+255,z_len),z_len,x,x_len,xRegion,zRegion))
                         if Data.iloc[x,z] == -9999:
                             pass
                         elif Data.iloc[x,z] <= waterLevel:
@@ -444,28 +444,28 @@ class win(QtWidgets.QWidget):
                                             if Data.iloc[x+1,z] == Data.iloc[x,z] and Data.iloc[x,z+1] == Data.iloc[x,z] and Data.iloc[x+1,z+1] == Data.iloc[x,z]:
                                                 for x,z in zip([x,x,x+1,x+1],[z,z+1,z,z+1]):
                                                     region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
-                                                    logging.info(tree+' large')
+                                                    #logging.info(tree+' large')
                                             elif Data.iloc[x-1,z] == Data.iloc[x,z] and Data.iloc[x,z+1] == Data.iloc[x,z] and Data.iloc[x-1,z+1] == Data.iloc[x,z]:
                                                 for x,z in zip([x,x,x-1,x-1],[z,z+1,z,z+1]):
                                                     region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
-                                                    logging.info(tree+' large')
+                                                    #logging.info(tree+' large')
                                             elif Data.iloc[x-1,z] == Data.iloc[x,z] and Data.iloc[x,z-1] == Data.iloc[x,z] and Data.iloc[x-1,z-1] == Data.iloc[x,z]:
                                                 for x,z in zip([x,x,x-1,x-1],[z,z-1,z,z-1]):
                                                     region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
-                                                    logging.info(tree+' large')
+                                                    #logging.info(tree+' large')
                                             elif Data.iloc[x+1,z] == Data.iloc[x,z] and Data.iloc[x,z-1] == Data.iloc[x,z] and Data.iloc[x+1,z-1] == Data.iloc[x,z]:
                                                 for x,z in zip([x,x,x+1,x+1],[z,z-1,z,z-1]):
                                                     region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
-                                                    logging.info(tree+' large')
+                                                    #logging.info(tree+' large')
                                             elif tree == 'dark_oak':
                                                 region.set_block(anvil.Block('minecraft','oak_sapling'),x,y+1,z)
-                                                logging.info('dark oak failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
+                                                #logging.info('dark oak failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
                                             else:
                                                 region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
-                                                logging.info('large tree failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
+                                                #logging.info('large tree failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
                                         else:
                                             region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
-                                            logging.info(tree)
+                                            #logging.info(tree)
                         else:
                             for y in range(yRange):
                                 if y == 0:
