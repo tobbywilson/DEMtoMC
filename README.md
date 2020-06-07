@@ -22,7 +22,7 @@ The script accepts any GDAL recognised raster format.
 **Horizontal Scale (default: 1):** reduction factor in x and z directions. For example, with a horizontal scale of 4, for every 4 cells in the input DEM, the output Minecraft world will have 1 block.  
 **Vertical Scale (default: 1):** as for horizontal scale, but in the vertical direction.  
 **Water Level (default: 1):** DEM value below which to add water instead of solid blocks.  
-**Skirt Height (default: 5):** height above the bottom of the Minecraft World to make the zero point of the DEM.  
+**Baseline Height (default: 5):** height above the bottom of the Minecraft World to make the zero point of the DEM.  
 
 **Main Block (default: stone):** the block used for all blocks, with the exception of the top block, in a stack.  
 **Top Block (default: stone):** the block used as the top block in a stack, except where that stack is a half integer tall.  
