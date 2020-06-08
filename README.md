@@ -11,7 +11,9 @@ Python Packages
 -	pandas (pip install pandas)  
 -	matplotlib (pip install matplotlib)  
 -	sys (pip install sys)  
+- logging (pip install logging)
 -	PySide2 (pip install PySide2)  
+- osgeo (pip install GDAL, this has been known to fail, an alternative is to download a wheel from here: https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal and use pip install [wheel file])
 
 ## Usage
 This script generates Minecraft anvil files, that can be copied into the "region" folder of any Minecraft world. It is suggested to generate a new world before starting. Suggested world options are super flat with preset settings: "minecraft:bedrock,5*minecraft:water", replacing the 5 by your the sum of your desired skirt height and your desired water height, less 1.
