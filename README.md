@@ -10,8 +10,6 @@ Python Packages
 -	numpy (pip install numpy)  
 -	pandas (pip install pandas)  
 -	matplotlib (pip install matplotlib)  
--	sys (pip install sys)  
-- logging (pip install logging)
 -	PySide2 (pip install PySide2)  
 - osgeo (pip install GDAL, this has been known to fail, an alternative is to download a wheel from here: https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal and use pip install [wheel file])
 
