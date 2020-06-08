@@ -5,8 +5,6 @@ Created on Tue Jun  2 17:55:53 2020
 @author: Toby
 """
 
-import pip
-
 #Data import and manipulation
 import numpy as np
 import pandas as pd
