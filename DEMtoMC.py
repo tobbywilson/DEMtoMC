@@ -87,7 +87,6 @@ class QTextEditLogger(logging.Handler):
         self.logger = QtWidgets.QPlainTextEdit(parent)
         self.logger.setReadOnly(True)
 
-
     def emit(self, record):
         msg = self.format(record)
         self.logger.appendPlainText(msg)
@@ -106,6 +105,7 @@ class win(QtWidgets.QWidget):
         vbox = QtWidgets.QVBoxLayout()
         vbox.addWidget(self.ioBox)
         vbox.addWidget(self.settingsBox)
+        vbox.addWidget(self.classifierBox)
         vbox.addWidget(self.buttonBox)
         #vbox.addWidget(self.logBox)
         self.setLayout(vbox)
@@ -115,6 +115,7 @@ class win(QtWidgets.QWidget):
         self.settingsBox = QtWidgets.QGroupBox("Settings")
         self.ioBox = QtWidgets.QGroupBox("File")
         self.forestBox = QtWidgets.QGroupBox("Forest")
+        self.classifierBox = QtWidgets.QGroupBox("Classifier Raster")
         #self.logBox = QtWidgets.QGroupBox("Execution Log")
 
         self.buttonLayout = QtWidgets.QHBoxLayout()
@@ -122,7 +123,9 @@ class win(QtWidgets.QWidget):
         self.ioLayout = QtWidgets.QVBoxLayout()
         self.fileLayout = QtWidgets.QHBoxLayout()
         self.outLayout = QtWidgets.QHBoxLayout()
+        self.classifierInLayout = QtWidgets.QHBoxLayout()
         self.forestLayout = QtWidgets.QGridLayout()
+        self.classifierLayout = QtWidgets.QVBoxLayout()
         #self.logLayout = QtWidgets.QVBoxLayout()
 
         #self.executeLog = QTextEditLogger(self)
@@ -132,6 +135,7 @@ class win(QtWidgets.QWidget):
 
         self.fileText = QtWidgets.QLabel("Choose a DEM file.")
         self.outLabel = QtWidgets.QLabel("Choose an output directory.")
+        self.openClassifierLabel = QtWidgets.QLabel("Choose a classifier raster. [optional]")
 
         global blockIn
         blockIn = QtWidgets.QComboBox()
@@ -202,20 +206,30 @@ class win(QtWidgets.QWidget):
         largeTreesFreqIn.setValue(25)
         largeTreesFreqIn.setMinimum(1)
 
+        global classifierDictIn
+        classifierDictIn = QtWidgets.QTableWidget(1,2)
+        classifierDictLabel = QtWidgets.QLabel("Classifier Raster Classes")
+        tableHeaders = ["Id","Block"]
+        classifierDictIn.setHorizontalHeaderLabels(tableHeaders)
+        classifierDictIn.cellChanged.connect(self.addRow)
+
         self.open = QtWidgets.QPushButton("Open File")
         self.out = QtWidgets.QPushButton("Select Output Directory")
+        self.openClassifier = QtWidgets.QPushButton("Open Classifier Raster")
         self.run = QtWidgets.QPushButton("Run")
         self.run.setEnabled(False)
         self.closeWin = QtWidgets.QPushButton("Close")
-
 
         self.fileLayout.addWidget(self.fileText)
         self.fileLayout.addWidget(self.open)
         self.outLayout.addWidget(self.outLabel)
         self.outLayout.addWidget(self.out)
+        self.classifierInLayout.addWidget(self.openClassifierLabel)
+        self.classifierInLayout.addWidget(self.openClassifier)
 
         self.ioLayout.addItem(self.fileLayout)
         self.ioLayout.addItem(self.outLayout)
+        self.ioLayout.addItem(self.classifierInLayout)
         self.ioBox.setLayout(self.ioLayout)
 
 
@@ -255,6 +269,10 @@ class win(QtWidgets.QWidget):
         self.settingsBox.setLayout(self.settingsLayout)
 
 
+        self.classifierLayout.addWidget(classifierDictIn)
+        self.classifierBox.setLayout(self.classifierLayout)
+
+
         self.buttonLayout.addWidget(self.run)
         self.buttonLayout.addWidget(self.closeWin)
 
@@ -270,6 +288,15 @@ class win(QtWidgets.QWidget):
         self.run.clicked.connect(self.execute)
         self.open.clicked.connect(self.openFile)
         self.out.clicked.connect(self.selDirect)
+        self.openClassifier.clicked.connect(self.openClassifierFile)
+
+    def addRow(self):
+        if classifierDictIn.item(classifierDictIn.rowCount()-1,0) is not None:
+            if classifierDictIn.item(classifierDictIn.rowCount()-1,0).text() != "":
+                classifierDictIn.insertRow(classifierDictIn.rowCount())
+        if classifierDictIn.item(classifierDictIn.rowCount()-1,1) is not None:
+            if classifierDictIn.item(classifierDictIn.rowCount()-1,1).text() != "":
+                classifierDictIn.insertRow(classifierDictIn.rowCount())
 
     def close(self):
         QtWidgets.QWidget.close(self)
@@ -285,8 +312,19 @@ class win(QtWidgets.QWidget):
             if self.directorySelected:
                 self.run.setEnabled(True)
             self.fileSelected = True
-            self.fileText.setText("{}".format(file))
-            logging.info("File Chosen: {}".format(file))
+            self.fileText.setText("DEM: {}".format(file))
+            logging.info("DEM: {}".format(file))
+
+    def openClassifierFile(self):
+        global classifierFile
+        fileOpenDialog = QtWidgets.QFileDialog(self)
+        classifierFile = fileOpenDialog.getOpenFileName(self,"Open File","","GDAL Raster Formats (*.asc *.tif *.tiff *.adf *.ACE2 *.gen *.thf *.arg *.bsb *.bt *.ctg *.dds *.dimap *.doq1 *.doq2 *.e00grid *.hdr *.eir *.fits *.grd *.gxf *.ida *.mpr *.isce *.mem *.kro *.gis *.lan *.mff *.ndf *.gmt *.aux *.png *.pgm *.slc *.int *.gri *.sdat *.sdts *.sgi *.snodas *.hgt *.xpm *.gff *.zmap);;Any File (*)")[0]
+        if file == "":
+            logging.info("No File Chosen. Please Choose a File")
+        else:
+            self.rasterSelected = True
+            self.openClassifierLabel.setText("Classifier Raster: {}".format(file))
+            logging.info("Classifier Raster: {}".format(file))
 
     def selDirect(self):
         global directory
@@ -295,11 +333,10 @@ class win(QtWidgets.QWidget):
         if directory == "":
             logging.info("No Directory Chosen. Please Choose a Directory")
         else:
-            logging.info(self.fileSelected)
             if self.fileSelected:
                 self.run.setEnabled(True)
             self.directorySelected = True
-            self.outLabel.setText("{}".format(directory))
+            self.outLabel.setText("Output Directory: {}".format(directory))
             logging.info("Output Directory: {}".format(directory))
 
     def execute(self):
@@ -350,24 +387,30 @@ class win(QtWidgets.QWidget):
         demIn = gdal.Open(file)
         dem = np.rot90(np.flip(demIn.ReadAsArray(),1))
 
+        classifierIn = gdal.Open(classifierFile)
+        classifier = np.rot90(np.flip(classifierIn.ReadAsArray(),1))
+
         del demIn
 
         logging.info("Scaling Horizontally")
 
 
-        dataLists = []
-        if scaleH != 1:
-            for n in range(int(len(dem[:,0])/scaleH)):
-                row=[]
-                for m in range(int(len(dem[0,:])/scaleH)):
-                    row.append(dem[n*scaleH:n*scaleH+scaleH,m*scaleH:m*scaleH+scaleH].max())
-                dataLists.append(row)
-        else:
-            dataLists = dem
+        def h_scale(data,scaleH):
+            dataLists = []
+            if scaleH != 1:
+                for n in range(int(len(data[:,0])/scaleH)):
+                    row=[]
+                    for m in range(int(len(data[0,:])/scaleH)):
+                        row.append(data[n*scaleH:n*scaleH+scaleH,m*scaleH:m*scaleH+scaleH].max())
+                    dataLists.append(row)
+            else:
+                dataLists = data
+            return dataLists
 
-        del dem
 
-        data = pd.DataFrame(dataLists)
+
+        data = pd.DataFrame(h_scale(dem,scaleH))
+        Classifier = pd.DataFrame(h_scale(classifier,scaleH))
 
         logging.info("Scaling Vertically")
 
@@ -388,6 +431,18 @@ class win(QtWidgets.QWidget):
         Data = dataVScaled.applymap(flex_round)
 
         del dataVScaled
+
+        classifierDict = {}
+
+        for i in range(classifierDictIn.rowCount()):
+            itemKey = classifierDictIn.item(i,0)
+            itemBlock = classifierDictIn.item(i,1)
+            if itemKey is not None:
+                if itemBlock is not None:
+                    classifierDict[int(itemKey.text())] = itemBlock.text()
+
+        if 'classifierFile' in globals() and bool(classifierDict):
+            classified = True
 
         logging.info("Data:\n{}".format(Data))
 
@@ -419,6 +474,8 @@ class win(QtWidgets.QWidget):
                     for Regionz in range(min(512,z_len-(zRegion)*512)):
                         x = Regionx + xRegion*512
                         z = Regionz + zRegion*512
+                        if classified:
+                            topBlock = anvil.Block('minecraft',classifierDict[Classifier.iloc[x,z]])
                         yRange = int(Data.iloc[x,z]+baselineHeight)
                         if z%256 == 0:
                             logging.info('Current Rows: {} to {} of {}, Column: {} of {}, Region: {}, {}'.format(z,min(z+255,z_len),z_len,x,x_len,xRegion,zRegion))
@@ -439,7 +496,6 @@ class win(QtWidgets.QWidget):
                                     if random.randrange(forestFreq) == 0 and forest:
                                         tree = random.choice(treeTypes).text()
                                         if (tree == 'dark_oak' or ((tree == 'jungle' or tree == 'spruce') and random.randrange(largeTreesFreq) == 0 and largeTrees)) and (x != (0 or 511) and z != (0 or 511)):
-
                                             if x+1 < x_len and z+1 < z_len:
                                                 sqRD = (Data.iloc[x+1,z] and Data.iloc[x,z+1] and Data.iloc[x+1,z+1]) == Data.iloc[x,z]
                                             else:
@@ -509,6 +565,7 @@ class win(QtWidgets.QWidget):
                 #                    region.set_block(water, x, y, z)
 
                 logging.info("Saving Minecraft Region: {}, {}".format(xRegion,zRegion))
+                print('{}/r.{}.{}.mca'.format(directory,xRegion,zRegion))
                 region.save('{}/r.{}.{}.mca'.format(directory,xRegion,zRegion))
                 del region
 
