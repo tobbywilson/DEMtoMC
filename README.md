@@ -18,6 +18,8 @@ Python Packages
 ## Usage
 This script generates Minecraft anvil files, that can be copied into the "region" folder of any Minecraft world. It is suggested to generate a new world before starting. Suggested world options are super flat with preset settings: "minecraft:bedrock,5*minecraft:water", replacing the 5 by your the sum of your desired skirt height and your desired water height, less 1.
 
+The classification raster should be ***exactly*** the same size as the DEM, and should have only integer values.
+
 The script accepts any GDAL recognised raster format.
 
 ## Settings
@@ -37,6 +39,7 @@ The script accepts any GDAL recognised raster format.
 **Large Tree Frequency (default: 25):** how often large trees should be used (e.g. if the value is 25, one in every 25 spruce and jungle trees will be attempt the be large). If the appropriate terrain is not available, the small version will be used.  
 **Tree Type(s) (default: oak):** the tree types available. Multiple types can be selected. If no type is selected, oak will be used. The trees are randomly selected with equal probability from the available types. If a dark_oak tree is selected, but the location is not valid for a dark_oak tree (i.e. there is a four block square with the same y value), an oak tree will be used instead.
 
+**Classifier Raster**: In the classifier raster box, each row should correspond to one Id, and it's associated Minecraft block. The Id should be an integer, while the Block should use the Minecraft [Namespaced Id](https://minecraft.gamepedia.com/Namespaced_ID).
 
 ## License
 This software is made available under the GNU LGPL 3.0 License.
