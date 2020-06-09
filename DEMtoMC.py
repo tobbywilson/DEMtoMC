@@ -353,7 +353,6 @@ class win(QtWidgets.QWidget):
                 if itemBlock is not None:
                     classifierDict.append([int(itemKey.text()),itemBlock.text()])
         classifierDictOut = pd.DataFrame(classifierDict)
-        print(classifierDictOut)
         classifierDictOut.to_csv(classifierDictFile[0],index=False,header=False)
 
     def selDirect(self):
