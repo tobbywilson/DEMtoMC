@@ -77,9 +77,11 @@ logFormat = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
 logToConsole = logging.StreamHandler(sys.stdout)
 logToConsole.setFormatter(logFormat)
+logToFile = logging.FileHandler('DEMtoMC.log')
+logToFile.setFormatter(logFormat)
 logging.getLogger().addHandler(logToConsole)
+logging.getLogger().addHandler(logToFile)
 logging.getLogger().setLevel(logging.DEBUG)
-
 
 class QTextEditLogger(logging.Handler):
     def __init__(self, parent):
@@ -506,8 +508,8 @@ class win(QtWidgets.QWidget):
                         if classified:
                             topBlock = anvil.Block('minecraft',classifierDict[Classifier.iloc[x,z]])
                         yRange = int(Data.iloc[x,z]+baselineHeight)
-                        if z%256 == 0:
-                            logging.info('Current Rows: {} to {} of {}, Column: {} of {}, Region: {}, {}'.format(z,min(z+255,z_len),z_len,x,x_len,xRegion,zRegion))
+                        if z%512 == 0:
+                            logging.info('Current Rows: {} to {} of {}, Column: {} of {}, Region: {}, {}'.format(z,min(z+511,z_len),z_len,x,x_len,xRegion,zRegion))
                         if Data.iloc[x,z] == -9999:
                             pass
                         elif Data.iloc[x,z] <= waterLevel:
@@ -593,8 +595,7 @@ class win(QtWidgets.QWidget):
                 #                for y in range(1,waterHeight):
                 #                    region.set_block(water, x, y, z)
 
-                logging.info("Saving Minecraft Region: {}, {}".format(xRegion,zRegion))
-                print('{}/r.{}.{}.mca'.format(directory,xRegion,zRegion))
+                logging.info("Saving Minecraft Region: {}, {}: {}/r.{}.{}.mca".format(xRegion,zRegion,directory,xRegion,zRegion))
                 region.save('{}/r.{}.{}.mca'.format(directory,xRegion,zRegion))
                 del region
 
