@@ -216,6 +216,7 @@ class win(QtWidgets.QWidget):
         self.open = QtWidgets.QPushButton("Open File")
         self.out = QtWidgets.QPushButton("Select Output Directory")
         self.openClassifier = QtWidgets.QPushButton("Open Classifier Raster")
+        self.openClassifierDict = QtWidgets.QPushButton("Open Classifier Dictionary")
         self.run = QtWidgets.QPushButton("Run")
         self.run.setEnabled(False)
         self.closeWin = QtWidgets.QPushButton("Close")
@@ -270,6 +271,7 @@ class win(QtWidgets.QWidget):
 
 
         self.classifierLayout.addWidget(classifierDictIn)
+        self.classifierLayout.addWidget(self.openClassifierDict)
         self.classifierBox.setLayout(self.classifierLayout)
 
 
@@ -289,6 +291,7 @@ class win(QtWidgets.QWidget):
         self.open.clicked.connect(self.openFile)
         self.out.clicked.connect(self.selDirect)
         self.openClassifier.clicked.connect(self.openClassifierFile)
+        self.openClassifierDict.clicked.connect(self.openClassifierDictFile)
 
     def addRow(self):
         if classifierDictIn.item(classifierDictIn.rowCount()-1,0) is not None:
@@ -325,6 +328,16 @@ class win(QtWidgets.QWidget):
             self.rasterSelected = True
             self.openClassifierLabel.setText("Classifier Raster: {}".format(file))
             logging.info("Classifier Raster: {}".format(file))
+
+    def openClassifierDictFile(self):
+        classifierDictFileDialog = QtWidgets.QFileDialog(self)
+        classifierDictFile = classifierDictFileDialog.getOpenFileName(self,"Open File")
+        classifierDictFromFile = pd.read_csv(classifierDictFile)
+        for i in range(len(classifierDictFromFile.iloc[0])):
+            classifierId = QtWidgets.QTableWidgetItem(classifierDictFromFile.iloc[i,0])
+            classifierBlock = QtWidgets.QTableWidgetItem(classifierDictFromFile.iloc[i,1])
+            classifierDictIn.setItem(i,0,classifierId)
+            classifierDictIn.setItem(i,1,classifierBlock)
 
     def selDirect(self):
         global directory
