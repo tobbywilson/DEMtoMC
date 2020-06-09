@@ -322,19 +322,19 @@ class win(QtWidgets.QWidget):
         global classifierFile
         fileOpenDialog = QtWidgets.QFileDialog(self)
         classifierFile = fileOpenDialog.getOpenFileName(self,"Open File","","GDAL Raster Formats (*.asc *.tif *.tiff *.adf *.ACE2 *.gen *.thf *.arg *.bsb *.bt *.ctg *.dds *.dimap *.doq1 *.doq2 *.e00grid *.hdr *.eir *.fits *.grd *.gxf *.ida *.mpr *.isce *.mem *.kro *.gis *.lan *.mff *.ndf *.gmt *.aux *.png *.pgm *.slc *.int *.gri *.sdat *.sdts *.sgi *.snodas *.hgt *.xpm *.gff *.zmap);;Any File (*)")[0]
-        if file == "":
+        if classifierFile == "":
             logging.info("No File Chosen. Please Choose a File")
         else:
             self.rasterSelected = True
-            self.openClassifierLabel.setText("Classifier Raster: {}".format(file))
-            logging.info("Classifier Raster: {}".format(file))
+            self.openClassifierLabel.setText("Classifier Raster: {}".format(classifierFile))
+            logging.info("Classifier Raster: {}".format(classifierFile))
 
     def openClassifierDictFile(self):
         classifierDictFileDialog = QtWidgets.QFileDialog(self)
-        classifierDictFile = classifierDictFileDialog.getOpenFileName(self,"Open File")
-        classifierDictFromFile = pd.read_csv(classifierDictFile)
-        for i in range(len(classifierDictFromFile.iloc[0])):
-            classifierId = QtWidgets.QTableWidgetItem(classifierDictFromFile.iloc[i,0])
+        classifierDictFile = classifierDictFileDialog.getOpenFileName(self,"Open File","","Any File (*)")
+        classifierDictFromFile = pd.read_csv(classifierDictFile[0],header=None)
+        for i in range(len(classifierDictFromFile)):
+            classifierId = QtWidgets.QTableWidgetItem(str(classifierDictFromFile.iloc[i,0]))
             classifierBlock = QtWidgets.QTableWidgetItem(classifierDictFromFile.iloc[i,1])
             classifierDictIn.setItem(i,0,classifierId)
             classifierDictIn.setItem(i,1,classifierBlock)
