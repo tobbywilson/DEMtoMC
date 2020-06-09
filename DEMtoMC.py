@@ -105,7 +105,6 @@ class win(QtWidgets.QWidget):
         vbox = QtWidgets.QVBoxLayout()
         vbox.addWidget(self.ioBox)
         vbox.addWidget(self.settingsBox)
-        vbox.addWidget(self.classifierBox)
         vbox.addWidget(self.buttonBox)
         #vbox.addWidget(self.logBox)
         self.setLayout(vbox)
@@ -115,7 +114,7 @@ class win(QtWidgets.QWidget):
         self.settingsBox = QtWidgets.QGroupBox("Settings")
         self.ioBox = QtWidgets.QGroupBox("File")
         self.forestBox = QtWidgets.QGroupBox("Forest")
-        self.classifierBox = QtWidgets.QGroupBox("Classifier Raster")
+        self.classifierBox = QtWidgets.QGroupBox("Classifier Raster Dictionary")
         #self.logBox = QtWidgets.QGroupBox("Execution Log")
 
         self.buttonLayout = QtWidgets.QHBoxLayout()
@@ -125,7 +124,7 @@ class win(QtWidgets.QWidget):
         self.outLayout = QtWidgets.QHBoxLayout()
         self.classifierInLayout = QtWidgets.QHBoxLayout()
         self.forestLayout = QtWidgets.QGridLayout()
-        self.classifierLayout = QtWidgets.QVBoxLayout()
+        self.classifierLayout = QtWidgets.QGridLayout()
         #self.logLayout = QtWidgets.QVBoxLayout()
 
         #self.executeLog = QTextEditLogger(self)
@@ -216,7 +215,8 @@ class win(QtWidgets.QWidget):
         self.open = QtWidgets.QPushButton("Open File")
         self.out = QtWidgets.QPushButton("Select Output Directory")
         self.openClassifier = QtWidgets.QPushButton("Open Classifier Raster")
-        self.openClassifierDict = QtWidgets.QPushButton("Open Classifier Dictionary")
+        self.openClassifierDict = QtWidgets.QPushButton("Load Classifier Dictionary from File")
+        self.saveClassifierDict = QtWidgets.QPushButton("Save Classifier Dictionary to File")
         self.run = QtWidgets.QPushButton("Run")
         self.run.setEnabled(False)
         self.closeWin = QtWidgets.QPushButton("Close")
@@ -267,13 +267,15 @@ class win(QtWidgets.QWidget):
         self.forestBox.setLayout(self.forestLayout)
         self.settingsLayout.addWidget(self.forestBox,5,0,1,4)
 
-        self.settingsBox.setLayout(self.settingsLayout)
 
-
-        self.classifierLayout.addWidget(classifierDictIn)
-        self.classifierLayout.addWidget(self.openClassifierDict)
+        self.classifierLayout.addWidget(classifierDictIn,0,0,1,2)
+        self.classifierLayout.addWidget(self.openClassifierDict,1,0)
+        self.classifierLayout.addWidget(self.saveClassifierDict,1,1)
         self.classifierBox.setLayout(self.classifierLayout)
 
+        self.settingsLayout.addWidget(self.classifierBox,6,0,1,4)
+
+        self.settingsBox.setLayout(self.settingsLayout)
 
         self.buttonLayout.addWidget(self.run)
         self.buttonLayout.addWidget(self.closeWin)
@@ -292,6 +294,7 @@ class win(QtWidgets.QWidget):
         self.out.clicked.connect(self.selDirect)
         self.openClassifier.clicked.connect(self.openClassifierFile)
         self.openClassifierDict.clicked.connect(self.openClassifierDictFile)
+        self.saveClassifierDict.clicked.connect(self.saveClassifierDictFile)
 
     def addRow(self):
         if classifierDictIn.item(classifierDictIn.rowCount()-1,0) is not None:
@@ -331,13 +334,27 @@ class win(QtWidgets.QWidget):
 
     def openClassifierDictFile(self):
         classifierDictFileDialog = QtWidgets.QFileDialog(self)
-        classifierDictFile = classifierDictFileDialog.getOpenFileName(self,"Open File","","Any File (*)")
+        classifierDictFile = classifierDictFileDialog.getOpenFileName(self,"Open File","","CSV File (*.csv);;Any File (*)")
         classifierDictFromFile = pd.read_csv(classifierDictFile[0],header=None)
         for i in range(len(classifierDictFromFile)):
             classifierId = QtWidgets.QTableWidgetItem(str(classifierDictFromFile.iloc[i,0]))
             classifierBlock = QtWidgets.QTableWidgetItem(classifierDictFromFile.iloc[i,1])
             classifierDictIn.setItem(i,0,classifierId)
             classifierDictIn.setItem(i,1,classifierBlock)
+
+    def saveClassifierDictFile(self):
+        classifierDictFileDialog = QtWidgets.QFileDialog(self)
+        classifierDictFile = classifierDictFileDialog.getSaveFileName(self,"Save File","","CSV File (*.csv);;Any File (*)")
+        classifierDict = []
+        for i in range(classifierDictIn.rowCount()):
+            itemKey = classifierDictIn.item(i,0)
+            itemBlock = classifierDictIn.item(i,1)
+            if itemKey is not None:
+                if itemBlock is not None:
+                    classifierDict.append([int(itemKey.text()),itemBlock.text()])
+        classifierDictOut = pd.DataFrame(classifierDict)
+        print(classifierDictOut)
+        classifierDictOut.to_csv(classifierDictFile[0],index=False,header=False)
 
     def selDirect(self):
         global directory
