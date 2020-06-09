@@ -376,7 +376,7 @@ class win(QtWidgets.QWidget):
         #self.executeLog.setFormatter(logFormat)
         #logging.getLogger().addHandler(self.executeLog)
         #logging.getLogger().setLevel(logging.DEBUG)
-
+        self.run.setEnabled(False)
         logging.info("Setting Parameters")
 
         waterLevel = waterLevelIn.value()
@@ -492,114 +492,117 @@ class win(QtWidgets.QWidget):
 
         logging.info("Regions: {}, {}".format(xRegions, zRegions))
 
-        for zRegion in range(zRegions):
+        try:
             for xRegion in range(xRegions):
+                for zRegion in range(zRegions):
 
-                logging.info("Creating Minecraft Region: {}, {}".format(xRegion,zRegion))
+                    logging.info("Creating Minecraft Region: {}, {}".format(xRegion,zRegion))
 
-                region = anvil.EmptyRegion(xRegion,zRegion)
+                    region = anvil.EmptyRegion(xRegion,zRegion)
 
-                logging.info("Region: {}, {}".format(xRegion,zRegion))
+                    logging.info("Region: {}, {}".format(xRegion,zRegion))
 
-                for Regionx in range(min(512,x_len-(xRegion)*512)):
-                    for Regionz in range(min(512,z_len-(zRegion)*512)):
-                        x = Regionx + xRegion*512
-                        z = Regionz + zRegion*512
-                        if classified:
-                            topBlock = anvil.Block('minecraft',classifierDict[Classifier.iloc[x,z]])
-                        yRange = int(Data.iloc[x,z]+baselineHeight)
-                        if z%512 == 0:
-                            logging.info('Current Rows: {} to {} of {}, Column: {} of {}, Region: {}, {}'.format(z,min(z+511,z_len),z_len,x,x_len,xRegion,zRegion))
-                        if Data.iloc[x,z] == -9999:
-                            pass
-                        elif Data.iloc[x,z] <= waterLevel:
-                            region.set_block(bedrock, x, 0, z)
-                            for y in range(1,waterHeight):
-                                region.set_block(water, x, y, z)
-                        elif Data.iloc[x,z]%1 == 0 or half_blocks == False:
-                            for y in range(yRange):
-                                if y == 0:
-                                    region.set_block(bedrock, x, y, z)
-                                elif y != yRange - 1:
-                                    region.set_block(block, x, y, z)
-                                else:
-                                    region.set_block(topBlock, x, y, z)
-                                    if random.randrange(forestFreq) == 0 and forest:
-                                        tree = random.choice(treeTypes).text()
-                                        if (tree == 'dark_oak' or ((tree == 'jungle' or tree == 'spruce') and random.randrange(largeTreesFreq) == 0 and largeTrees)) and (x != (0 or 511) and z != (0 or 511)):
-                                            if x+1 < x_len and z+1 < z_len:
-                                                sqRD = (Data.iloc[x+1,z] and Data.iloc[x,z+1] and Data.iloc[x+1,z+1]) == Data.iloc[x,z]
-                                            else:
-                                                sqRD = False
-                                            if x+1 < x_len:
-                                                sqRU = (Data.iloc[x+1,z] and Data.iloc[x,z-1] and Data.iloc[x+1,z-1]) == Data.iloc[x,z]
-                                            else:
-                                                sqRU = False
-                                            if z+1 < z_len:
-                                                sqLD = (Data.iloc[x-1,z] and Data.iloc[x,z+1] and Data.iloc[x-1,z+1]) == Data.iloc[x,z]
-                                            else:
-                                                sqLD = False
+                    for Regionx in range(min(512,x_len-(xRegion)*512)):
+                        for Regionz in range(min(512,z_len-(zRegion)*512)):
+                            x = Regionx + xRegion*512
+                            z = Regionz + zRegion*512
+                            if classified:
+                                topBlock = anvil.Block('minecraft',classifierDict[Classifier.iloc[x,z]])
+                            yRange = int(Data.iloc[x,z]+baselineHeight)
+                            if z%512 == 0:
+                                logging.debug('Current Rows: {} to {} of {}, Column: {} of {}, Region: {}, {}'.format(z,min(z+511,z_len),z_len,x,x_len,xRegion,zRegion))
+                            if Data.iloc[x,z] == -9999:
+                                pass
+                            elif Data.iloc[x,z] <= waterLevel:
+                                region.set_block(bedrock, x, 0, z)
+                                for y in range(1,waterHeight):
+                                    region.set_block(water, x, y, z)
+                            elif Data.iloc[x,z]%1 == 0 or half_blocks == False:
+                                for y in range(yRange):
+                                    if y == 0:
+                                        region.set_block(bedrock, x, y, z)
+                                    elif y != yRange - 1:
+                                        region.set_block(block, x, y, z)
+                                    else:
+                                        region.set_block(topBlock, x, y, z)
+                                        if random.randrange(forestFreq) == 0 and forest:
+                                            tree = random.choice(treeTypes).text()
+                                            if (tree == 'dark_oak' or ((tree == 'jungle' or tree == 'spruce') and random.randrange(largeTreesFreq) == 0 and largeTrees)) and (x != (0 or 511) and z != (0 or 511)):
+                                                if x+1 < x_len and z+1 < z_len:
+                                                    sqRD = (Data.iloc[x+1,z] and Data.iloc[x,z+1] and Data.iloc[x+1,z+1]) == Data.iloc[x,z]
+                                                else:
+                                                    sqRD = False
+                                                if x+1 < x_len:
+                                                    sqRU = (Data.iloc[x+1,z] and Data.iloc[x,z-1] and Data.iloc[x+1,z-1]) == Data.iloc[x,z]
+                                                else:
+                                                    sqRU = False
+                                                if z+1 < z_len:
+                                                    sqLD = (Data.iloc[x-1,z] and Data.iloc[x,z+1] and Data.iloc[x-1,z+1]) == Data.iloc[x,z]
+                                                else:
+                                                    sqLD = False
 
-                                            sqLU = (Data.iloc[x-1,z] and Data.iloc[x,z-1] and Data.iloc[x-1,z-1]) == Data.iloc[x,z]
+                                                sqLU = (Data.iloc[x-1,z] and Data.iloc[x,z-1] and Data.iloc[x-1,z-1]) == Data.iloc[x,z]
 
 
-                                            if sqRD:
-                                                for x,z in zip([x,x,x+1,x+1],[z,z+1,z,z+1]):
+                                                if sqRD:
+                                                    for x,z in zip([x,x,x+1,x+1],[z,z+1,z,z+1]):
+                                                        region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
+                                                        #logging.info(tree+' large')
+                                                elif sqLD:
+                                                    for x,z in zip([x,x,x-1,x-1],[z,z+1,z,z+1]):
+                                                        region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
+                                                        #logging.info(tree+' large')
+                                                elif sqLU:
+                                                    for x,z in zip([x,x,x-1,x-1],[z,z-1,z,z-1]):
+                                                        region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
+                                                        #logging.info(tree+' large')
+                                                elif sqRU:
+                                                    for x,z in zip([x,x,x+1,x+1],[z,z-1,z,z-1]):
+                                                        region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
+                                                        #logging.info(tree+' large')
+                                                elif tree == 'dark_oak':
+                                                    region.set_block(anvil.Block('minecraft','oak_sapling'),x,y+1,z)
+                                                    #logging.info('dark oak failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
+                                                else:
                                                     region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
-                                                    #logging.info(tree+' large')
-                                            elif sqLD:
-                                                for x,z in zip([x,x,x-1,x-1],[z,z+1,z,z+1]):
-                                                    region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
-                                                    #logging.info(tree+' large')
-                                            elif sqLU:
-                                                for x,z in zip([x,x,x-1,x-1],[z,z-1,z,z-1]):
-                                                    region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
-                                                    #logging.info(tree+' large')
-                                            elif sqRU:
-                                                for x,z in zip([x,x,x+1,x+1],[z,z-1,z,z-1]):
-                                                    region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
-                                                    #logging.info(tree+' large')
-                                            elif tree == 'dark_oak':
-                                                region.set_block(anvil.Block('minecraft','oak_sapling'),x,y+1,z)
-                                                #logging.info('dark oak failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
+                                                    #logging.info('large tree failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
                                             else:
                                                 region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
-                                                #logging.info('large tree failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
-                                        else:
-                                            region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
-                                            #logging.info(tree)
-                        else:
-                            for y in range(yRange):
-                                if y == 0:
-                                    region.set_block(bedrock, x, y, z)
-                                elif y != yRange - 1:
-                                    region.set_block(block, x, y, z)
-                                else:
-                                    region.set_block(block, x, y, z)
-                                    region.set_block(halfBlock, x, yRange, z)
-                #if xRegion == xRegions - 1 or zRegion == zRegions - 1:
-                #    if x_len%512 != 0:
-                #        for x in range(x_len,xRegions*512):
-                #            for z in range((zRegion)*512,(zRegion+1)*512):
-                #                if (x%16 == 0 and z%16 == 0):
-                #                    logging.info('Current Chunk: {},~,{}'.format(int(x/16),int(z/16)))
-                #                region.set_block(bedrock, x, 0, z)
-                #                for y in range(1,waterHeight):
-                #                    region.set_block(water, x, y, z)
-                #    if z_len%512 !=0:
-                #        for z in range(z_len,zRegions*512):
-                #            for x in range((xRegion)*512,(xRegion+1)*512):
-                #                if (x%16 == 0 and z%16 == 0):
-                #                    logging.info('Current Chunk: {},~,{}'.format(int(x/16),int(z/16)))
-                #                region.set_block(bedrock, x, 0, z)
-                #                for y in range(1,waterHeight):
-                #                    region.set_block(water, x, y, z)
+                                                #logging.info(tree)
+                            else:
+                                for y in range(yRange):
+                                    if y == 0:
+                                        region.set_block(bedrock, x, y, z)
+                                    elif y != yRange - 1:
+                                        region.set_block(block, x, y, z)
+                                    else:
+                                        region.set_block(block, x, y, z)
+                                        region.set_block(halfBlock, x, yRange, z)
+                    #if xRegion == xRegions - 1 or zRegion == zRegions - 1:
+                    #    if x_len%512 != 0:
+                    #        for x in range(x_len,xRegions*512):
+                    #            for z in range((zRegion)*512,(zRegion+1)*512):
+                    #                if (x%16 == 0 and z%16 == 0):
+                    #                    logging.info('Current Chunk: {},~,{}'.format(int(x/16),int(z/16)))
+                    #                region.set_block(bedrock, x, 0, z)
+                    #                for y in range(1,waterHeight):
+                    #                    region.set_block(water, x, y, z)
+                    #    if z_len%512 !=0:
+                    #        for z in range(z_len,zRegions*512):
+                    #            for x in range((xRegion)*512,(xRegion+1)*512):
+                    #                if (x%16 == 0 and z%16 == 0):
+                    #                    logging.info('Current Chunk: {},~,{}'.format(int(x/16),int(z/16)))
+                    #                region.set_block(bedrock, x, 0, z)
+                    #                for y in range(1,waterHeight):
+                    #                    region.set_block(water, x, y, z)
 
-                logging.info("Saving Minecraft Region: {}, {}: {}/r.{}.{}.mca".format(xRegion,zRegion,directory,xRegion,zRegion))
-                region.save('{}/r.{}.{}.mca'.format(directory,xRegion,zRegion))
-                del region
-
+                    logging.info("Saving Minecraft Region: {}, {}: {}/r.{}.{}.mca".format(xRegion,zRegion,directory,xRegion,zRegion))
+                    region.save('{}/r.{}.{}.mca'.format(directory,xRegion,zRegion))
+                    del region
+        except:
+            logging.exception("There was an error in processing at point {}, ~, {}. The Data value is {}".format(x,z,Data[x,z]))
         logging.info("Done")
+        self.run.setEnabled(True)
 
         del Data
 
