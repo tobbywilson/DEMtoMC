@@ -16,6 +16,9 @@ import matplotlib.pyplot as plt
 import sys
 import logging
 
+#miscellaneous file functions
+import os
+
 #GUI
 from PySide2 import QtCore, QtWidgets, QtGui
 
@@ -77,11 +80,12 @@ logFormat = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
 logToConsole = logging.StreamHandler(sys.stdout)
 logToConsole.setFormatter(logFormat)
-logToFile = logging.FileHandler('DEMtoMC.log')
+logToFile = logging.FileHandler('DEMtoMC.log',mode='w')
 logToFile.setFormatter(logFormat)
 logging.getLogger().addHandler(logToConsole)
 logging.getLogger().addHandler(logToFile)
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.INFO)
+
 
 class QTextEditLogger(logging.Handler):
     def __init__(self, parent):
@@ -117,6 +121,7 @@ class win(QtWidgets.QWidget):
         self.ioBox = QtWidgets.QGroupBox("File")
         self.forestBox = QtWidgets.QGroupBox("Forest")
         self.classifierBox = QtWidgets.QGroupBox("Classifier Raster Dictionary")
+        self.featuresBox = QtWidgets.QGroupBox("Features Raster Dictionary")
         #self.logBox = QtWidgets.QGroupBox("Execution Log")
 
         self.buttonLayout = QtWidgets.QHBoxLayout()
@@ -125,8 +130,11 @@ class win(QtWidgets.QWidget):
         self.fileLayout = QtWidgets.QHBoxLayout()
         self.outLayout = QtWidgets.QHBoxLayout()
         self.classifierInLayout = QtWidgets.QHBoxLayout()
+        self.featuresInLayout = QtWidgets.QHBoxLayout()
+        self.featuresHeightsInLayout = QtWidgets.QHBoxLayout()
         self.forestLayout = QtWidgets.QGridLayout()
         self.classifierLayout = QtWidgets.QGridLayout()
+        self.featuresLayout = QtWidgets.QGridLayout()
         #self.logLayout = QtWidgets.QVBoxLayout()
 
         #self.executeLog = QTextEditLogger(self)
@@ -137,6 +145,8 @@ class win(QtWidgets.QWidget):
         self.fileText = QtWidgets.QLabel("Choose a DEM file.")
         self.outLabel = QtWidgets.QLabel("Choose an output directory.")
         self.openClassifierLabel = QtWidgets.QLabel("Choose a classifier raster. [optional]")
+        self.openFeaturesLabel = QtWidgets.QLabel("Choose a features raster. [optional]")
+        self.openFeaturesHeightsLabel = QtWidgets.QLabel("Choose a feature heights raster. [optional]")
 
         global blockIn
         blockIn = QtWidgets.QComboBox()
@@ -214,11 +224,24 @@ class win(QtWidgets.QWidget):
         classifierDictIn.setHorizontalHeaderLabels(tableHeaders)
         classifierDictIn.cellChanged.connect(self.addRow)
 
+        global featuresDictIn
+        featuresDictIn = QtWidgets.QTableWidget(1,2)
+        featuresDictLabel = QtWidgets.QLabel("Features Raster Classes")
+        tableHeaders = ["Id","Block"]
+        featuresDictIn.setHorizontalHeaderLabels(tableHeaders)
+        featuresDictIn.cellChanged.connect(self.addRow)
+
         self.open = QtWidgets.QPushButton("Open File")
         self.out = QtWidgets.QPushButton("Select Output Directory")
         self.openClassifier = QtWidgets.QPushButton("Open Classifier Raster")
         self.openClassifierDict = QtWidgets.QPushButton("Load Classifier Dictionary from File")
         self.saveClassifierDict = QtWidgets.QPushButton("Save Classifier Dictionary to File")
+        self.openFeatures = QtWidgets.QPushButton("Open Features Raster")
+        self.openFeaturesHeights = QtWidgets.QPushButton("Open Feature Heights Raster")
+        self.openFeaturesDict = QtWidgets.QPushButton("Load Features Dictionary from File")
+        self.saveFeaturesDict = QtWidgets.QPushButton("Save Features Dictionary to File")
+        self.debugCheckLabel = QtWidgets.QLabel("Run in debug mode:")
+        self.debugCheck = QtWidgets.QCheckBox()
         self.run = QtWidgets.QPushButton("Run")
         self.run.setEnabled(False)
         self.closeWin = QtWidgets.QPushButton("Close")
@@ -229,10 +252,16 @@ class win(QtWidgets.QWidget):
         self.outLayout.addWidget(self.out)
         self.classifierInLayout.addWidget(self.openClassifierLabel)
         self.classifierInLayout.addWidget(self.openClassifier)
+        self.featuresInLayout.addWidget(self.openFeaturesLabel)
+        self.featuresInLayout.addWidget(self.openFeatures)
+        self.featuresHeightsInLayout.addWidget(self.openFeaturesHeightsLabel)
+        self.featuresHeightsInLayout.addWidget(self.openFeaturesHeights)
 
         self.ioLayout.addItem(self.fileLayout)
         self.ioLayout.addItem(self.outLayout)
         self.ioLayout.addItem(self.classifierInLayout)
+        self.ioLayout.addItem(self.featuresInLayout)
+        self.ioLayout.addItem(self.featuresHeightsInLayout)
         self.ioBox.setLayout(self.ioLayout)
 
 
@@ -275,10 +304,18 @@ class win(QtWidgets.QWidget):
         self.classifierLayout.addWidget(self.saveClassifierDict,1,1)
         self.classifierBox.setLayout(self.classifierLayout)
 
+        self.featuresLayout.addWidget(featuresDictIn,0,0,1,2)
+        self.featuresLayout.addWidget(self.openFeaturesDict,1,0)
+        self.featuresLayout.addWidget(self.saveFeaturesDict,1,1)
+        self.featuresBox.setLayout(self.featuresLayout)
+
         self.settingsLayout.addWidget(self.classifierBox,6,0,1,4)
+        self.settingsLayout.addWidget(self.featuresBox,7,0,1,4)
 
         self.settingsBox.setLayout(self.settingsLayout)
 
+        self.buttonLayout.addWidget(self.debugCheckLabel)
+        self.buttonLayout.addWidget(self.debugCheck)
         self.buttonLayout.addWidget(self.run)
         self.buttonLayout.addWidget(self.closeWin)
 
@@ -295,16 +332,25 @@ class win(QtWidgets.QWidget):
         self.open.clicked.connect(self.openFile)
         self.out.clicked.connect(self.selDirect)
         self.openClassifier.clicked.connect(self.openClassifierFile)
+        self.openFeatures.clicked.connect(self.openFeaturesFile)
+        self.openFeaturesHeights.clicked.connect(self.openFeaturesHeightsFile)
         self.openClassifierDict.clicked.connect(self.openClassifierDictFile)
         self.saveClassifierDict.clicked.connect(self.saveClassifierDictFile)
+        self.openFeaturesDict.clicked.connect(self.openFeaturesDictFile)
+        self.saveFeaturesDict.clicked.connect(self.saveFeaturesDictFile)
+        self.debugCheck.stateChanged.connect()
+
+    def debugCheckFunc(self):
+        if self.sender().isChecked():
+            logging.getLogger().setLevel(logging.DEBUG)
 
     def addRow(self):
-        if classifierDictIn.item(classifierDictIn.rowCount()-1,0) is not None:
-            if classifierDictIn.item(classifierDictIn.rowCount()-1,0).text() != "":
-                classifierDictIn.insertRow(classifierDictIn.rowCount())
-        if classifierDictIn.item(classifierDictIn.rowCount()-1,1) is not None:
-            if classifierDictIn.item(classifierDictIn.rowCount()-1,1).text() != "":
-                classifierDictIn.insertRow(classifierDictIn.rowCount())
+        if self.sender().item(self.sender().rowCount()-1,0) is not None:
+            if self.sender().item(self.sender().rowCount()-1,0).text() != "":
+                self.sender().insertRow(self.sender().rowCount())
+        if self.sender().item(self.sender().rowCount()-1,1) is not None:
+            if self.sender().item(self.sender().rowCount()-1,1).text() != "":
+                self.sender().insertRow(self.sender().rowCount())
 
     def close(self):
         QtWidgets.QWidget.close(self)
@@ -317,11 +363,27 @@ class win(QtWidgets.QWidget):
             logging.info("No File Chosen. Please Choose a File")
         else:
             logging.info(self.fileSelected)
-            if self.directorySelected:
-                self.run.setEnabled(True)
+            if not self.directorySelected:
+                global directory
+                directory = os.path.dirname(file)
+                self.outLabel.setText("Output Directory: {}".format(directory))
+            self.run.setEnabled(True)
             self.fileSelected = True
             self.fileText.setText("DEM: {}".format(file))
             logging.info("DEM: {}".format(file))
+
+    def selDirect(self):
+        global directory
+        fileDirectDialog = QtWidgets.QFileDialog(self)
+        directory = fileDirectDialog.getExistingDirectory(self,"Select Output Directory")
+        if directory == "":
+            logging.info("No Directory Chosen. Please Choose a Directory")
+        else:
+            if self.fileSelected:
+                self.run.setEnabled(True)
+            self.directorySelected = True
+            self.outLabel.setText("Output Directory: {}".format(directory))
+            logging.info("Output Directory: {}".format(directory))
 
     def openClassifierFile(self):
         global classifierFile
@@ -361,18 +423,56 @@ class win(QtWidgets.QWidget):
         del classifierDictOut
         del classifierDictFile
 
-    def selDirect(self):
-        global directory
-        fileDirectDialog = QtWidgets.QFileDialog(self)
-        directory = fileDirectDialog.getExistingDirectory(self,"Select Output Directory")
-        if directory == "":
-            logging.info("No Directory Chosen. Please Choose a Directory")
+    def openFeaturesFile(self):
+        global featuresFile
+        fileOpenDialog = QtWidgets.QFileDialog(self)
+        featuresFile = fileOpenDialog.getOpenFileName(self,"Open File","","GDAL Raster Formats (*.asc *.tif *.tiff *.adf *.ACE2 *.gen *.thf *.arg *.bsb *.bt *.ctg *.dds *.dimap *.doq1 *.doq2 *.e00grid *.hdr *.eir *.fits *.grd *.gxf *.ida *.mpr *.isce *.mem *.kro *.gis *.lan *.mff *.ndf *.gmt *.aux *.png *.pgm *.slc *.int *.gri *.sdat *.sdts *.sgi *.snodas *.hgt *.xpm *.gff *.zmap);;Any File (*)")[0]
+        if featuresFile == "":
+            logging.info("No File Chosen. Please Choose a File")
         else:
-            if self.fileSelected:
-                self.run.setEnabled(True)
-            self.directorySelected = True
-            self.outLabel.setText("Output Directory: {}".format(directory))
-            logging.info("Output Directory: {}".format(directory))
+            self.rasterSelected = True
+            self.openFeaturesLabel.setText("Features Raster: {}".format(featuresFile))
+            logging.info("Features Raster: {}".format(featuresFile))
+
+    def openFeaturesHeightsFile(self):
+        global featuresHeightsFile
+        fileOpenDialog = QtWidgets.QFileDialog(self)
+        featuresHeightsFile = fileOpenDialog.getOpenFileName(self,"Open File","","GDAL Raster Formats (*.asc *.tif *.tiff *.adf *.ACE2 *.gen *.thf *.arg *.bsb *.bt *.ctg *.dds *.dimap *.doq1 *.doq2 *.e00grid *.hdr *.eir *.fits *.grd *.gxf *.ida *.mpr *.isce *.mem *.kro *.gis *.lan *.mff *.ndf *.gmt *.aux *.png *.pgm *.slc *.int *.gri *.sdat *.sdts *.sgi *.snodas *.hgt *.xpm *.gff *.zmap);;Any File (*)")[0]
+        if featuresHeightsFile == "":
+            logging.info("No File Chosen. Please Choose a File")
+        else:
+            self.rasterSelected = True
+            self.openFeaturesHeightsLabel.setText("Feature Heights Raster: {}".format(featuresHeightsFile))
+            logging.info("Feature Heights Raster: {}".format(featuresHeightsFile))
+
+    def openFeaturesDictFile(self):
+        featuresDictFileDialog = QtWidgets.QFileDialog(self)
+        featuresDictFile = featuresDictFileDialog.getOpenFileName(self,"Open File","","CSV File (*.csv);;Any File (*)")
+        featuresDictFromFile = pd.read_csv(featuresDictFile[0],header=None)
+        for i in range(len(featuresDictFromFile)):
+            featuresId = QtWidgets.QTableWidgetItem(str(featuresDictFromFile.iloc[i,0]))
+            featuresBlock = QtWidgets.QTableWidgetItem(featuresDictFromFile.iloc[i,1])
+            featuresDictIn.setItem(i,0,featuresId)
+            featuresDictIn.setItem(i,1,featuresBlock)
+        del featuresDictFromFile
+        del featuresDictFile
+
+    def saveFeaturesDictFile(self):
+        featuresDictFileDialog = QtWidgets.QFileDialog(self)
+        featuresDictFile = featuresDictFileDialog.getSaveFileName(self,"Save File","","CSV File (*.csv);;Any File (*)")
+        featuresDict = []
+        for i in range(featuresDictIn.rowCount()):
+            itemKey = featuresDictIn.item(i,0)
+            itemBlock = featuresDictIn.item(i,1)
+            if itemKey is not None:
+                if itemBlock is not None:
+                    featuresDict.append([int(itemKey.text()),itemBlock.text()])
+        featuresDictOut = pd.DataFrame(featuresDict)
+        featuresDictOut.to_csv(featuresDictFile[0],index=False,header=False)
+        del featuresDictOut
+        del featuresDictFile
+
+
 
     def execute(self):
 
@@ -422,11 +522,28 @@ class win(QtWidgets.QWidget):
         demIn = gdal.Open(file)
         dem = np.rot90(np.flip(demIn.ReadAsArray(),1))
 
-        classifierIn = gdal.Open(classifierFile)
-        classifier = np.rot90(np.flip(classifierIn.ReadAsArray(),1))
+        if 'classifierFile' in globals():
+            logging.debug("Classifier file found")
+            classifierIn = gdal.Open(classifierFile)
+            classifier = np.rot90(np.flip(classifierIn.ReadAsArray(),1))
+
+        if 'featuresFile' in globals():
+            featuresIn = gdal.Open(featuresFile)
+            features = np.rot90(np.flip(featuresIn.ReadAsArray(),1))
+
+        if 'featuresHeightsFile' in globals():
+            featuresHeightsIn = gdal.Open(featuresHeightsFile)
+            featuresHeights = np.rot90(np.flip(featuresHeightsIn.ReadAsArray(),1))
+
 
         del demIn
-        del classifierIn
+        if 'classifierIn' in globals():
+            del classifierIn
+        if 'featuresHeightsIn' in globals():
+            del featuresHeightsIn
+        if 'featuresIn' in globals():
+            del featuresIn
+
 
         logging.info("Scaling Horizontally")
 
@@ -446,12 +563,19 @@ class win(QtWidgets.QWidget):
 
 
         data = pd.DataFrame(h_scale(dem,scaleH))
-        Classifier = pd.DataFrame(h_scale(classifier,scaleH))
+
+        if 'classifierFile' in globals():
+            Classifier = pd.DataFrame(h_scale(classifier,scaleH))
+        if 'featuresFile' in globals():
+            Features = pd.DataFrame(h_scale(features,scaleH))
+        if 'featuresHeightsFile' in globals():
+            FeaturesHeights = pd.DataFrame(h_scale(featuresHeights,scaleH))
 
         logging.info("Scaling Vertically")
 
         del dem
-        del classifier
+        if 'classifier' in globals():
+            del classifier
 
         def vert_scale(number,scale=scaleV):
             return number/scale
@@ -470,19 +594,39 @@ class win(QtWidgets.QWidget):
 
         del dataVScaled
 
-        classifierDict = {}
+        if ('classifierFile' and 'classifierDictIn') in globals():
+            classifierDict = {}
+            for i in range(classifierDictIn.rowCount()):
+                itemKey = classifierDictIn.item(i,0)
+                itemBlock = classifierDictIn.item(i,1)
+                if itemKey is not None:
+                    if itemBlock is not None:
+                        classifierDict[int(itemKey.text())] = itemBlock.text()
+            if bool(classifierDict):
+                classified = True
+            else:
+                classified = False
+        else:
+            classified = False
+        logging.debug("Classified: {}".format(classified))
 
-        for i in range(classifierDictIn.rowCount()):
-            itemKey = classifierDictIn.item(i,0)
-            itemBlock = classifierDictIn.item(i,1)
-            if itemKey is not None:
-                if itemBlock is not None:
-                    classifierDict[int(itemKey.text())] = itemBlock.text()
+        if ('featuresFile' and 'featuresDictIn') in globals():
+            featuresDict = {}
+            for i in range(featuresDictIn.rowCount()):
+                itemKey = featuresDictIn.item(i,0)
+                itemBlock = featuresDictIn.item(i,1)
+                if itemKey is not None:
+                    if itemBlock is not None:
+                        featuresDict[int(itemKey.text())] = itemBlock.text()
+            if bool(featuresDict):
+                useFeatures = True
+            else:
+                useFeatures = False
+        else:
+            useFeatures = False
+        logging.debug("Using Features: {}".format(features))
 
-        if 'classifierFile' in globals() and bool(classifierDict):
-            classified = True
-
-        logging.info("Data:\n{}".format(Data))
+        logging.debug("Data:\n{}".format(Data))
 
         logging.info("Finding DEM Size")
 
@@ -498,6 +642,8 @@ class win(QtWidgets.QWidget):
         zRegions = int(np.ceil(z_len/512))
 
         logging.info("Regions: {}, {}".format(xRegions, zRegions))
+
+        logging.debug('Local variables: {}\nGlobal Variables: {}'.format(locals(),globals()))
 
         try:
             for xRegion in range(xRegions):
@@ -532,7 +678,16 @@ class win(QtWidgets.QWidget):
                                         region.set_block(block, x, y, z)
                                     else:
                                         region.set_block(topBlock, x, y, z)
-                                        if random.randrange(forestFreq) == 0 and forest and classifierDict[Classifier.iloc[x,z]] == ('dirt' or 'grass_block' or 'podzol'):
+                                        if useFeatures:
+                                            if featuresDict[Features.iloc[x,z]] != (0 or 'None') or featuresDict[Features.iloc[x,z]] is not None:
+                                                featureBool = True
+                                                featureBlock = anvil.Block(featuresDict[Features.iloc[x,z]])
+                                                for h in range(FeaturesHeights.iloc[x,z]):
+                                                    yObj = y + 1 + h
+                                                    region.set_block(featureBlock,x,yObj,z)
+                                            else:
+                                                featureBool = False
+                                        if random.randrange(forestFreq) == 0 and forest and classifierDict[Classifier.iloc[x,z]] == ('dirt' or 'grass_block' or 'podzol') and feature is False:
                                             tree = random.choice(treeTypes).text()
                                             if (tree == 'dark_oak' or ((tree == 'jungle' or tree == 'spruce') and random.randrange(largeTreesFreq) == 0 and largeTrees)) and (x != (0 or 511) and z != (0 or 511)):
                                                 if x+1 < x_len and z+1 < z_len:
@@ -612,8 +767,17 @@ class win(QtWidgets.QWidget):
         self.run.setEnabled(True)
 
         del Data
-        del Classifier
-        del classifierDict
+        if 'Classifier' in globals():
+            del Classifier
+        if 'classifierDict' in globals():
+            del classifierDict
+        if 'featuresDict' in globals():
+            del featuresDict
+        if 'Features' in globals():
+            del Features
+        if 'FeaturesHeights' in globals():
+            del FeaturesHeights
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
