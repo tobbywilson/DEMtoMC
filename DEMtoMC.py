@@ -158,36 +158,19 @@ class win(QtWidgets.QWidget):
         self.openFeaturesLabel = QtWidgets.QLabel("Choose a features raster. [optional]")
         self.openFeaturesHeightsLabel = QtWidgets.QLabel("Choose a feature heights raster. [optional]")
 
-        global blockIn
-        blockIn = QtWidgets.QComboBox()
-        blockLabel = QtWidgets.QLabel("Main Block")
-        blockIn.addItems(blockList)
-
-        global topBlockIn
-        topBlockIn = QtWidgets.QComboBox()
-        topBlockLabel = QtWidgets.QLabel("Top Block")
-        topBlockIn.addItems(blockList)
-
-        global half_blocksIn
-        half_blocksIn = QtWidgets.QCheckBox()
-        half_blocksLabel = QtWidgets.QLabel("Use half blocks:")
-
-        global halfBlockTypeIn
-        halfBlockTypeIn = QtWidgets.QComboBox()
-        halfBlockTypeLabel = QtWidgets.QLabel("Half Block Type:")
-        halfBlockTypeIn.addItems(half_blockList)
-
         global scaleHIn
         scaleHIn = QtWidgets.QSpinBox()
-        scaleHLabel = QtWidgets.QLabel("Horizontal Scale 1:")
+        scaleHLabel = QtWidgets.QLabel("Horizontal Scale:     1/")
+        scaleHLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         scaleHIn.setValue(1)
-        scaleHIn.setRange(1,16)
+        scaleHIn.setMinimum(1)
 
         global scaleVIn
         scaleVIn = QtWidgets.QSpinBox()
-        scaleVLabel = QtWidgets.QLabel("Vertical Scale 1:")
+        scaleVLabel = QtWidgets.QLabel("Vertical Scale:     1/")
+        scaleVLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         scaleVIn.setValue(1)
-        scaleVIn.setRange(1,16)
+        scaleVIn.setMinimum(1)
 
         global autoScaleIn
         autoScaleIn = QtWidgets.QCheckBox()
@@ -197,38 +180,68 @@ class win(QtWidgets.QWidget):
         global waterLevelIn
         waterLevelIn = QtWidgets.QSpinBox()
         waterLabel = QtWidgets.QLabel("Water Level:")
+        waterLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         waterLevelIn.setValue(1)
         waterLevelIn.setRange(0,256)
 
         global baselineHeightIn
         baselineHeightIn = QtWidgets.QSpinBox()
-        baselineHeightLabel = QtWidgets.QLabel("Baseline Height")
+        baselineHeightLabel = QtWidgets.QLabel("Baseline Height:")
+        baselineHeightLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         baselineHeightIn.setValue(5)
         baselineHeightIn.setRange(-9000,256)
 
+        global blockIn
+        blockIn = QtWidgets.QComboBox()
+        blockLabel = QtWidgets.QLabel("Main Block:")
+        blockLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        blockIn.addItems(blockList)
+
+        global topBlockIn
+        topBlockIn = QtWidgets.QComboBox()
+        topBlockLabel = QtWidgets.QLabel("Top Block:")
+        topBlockLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        topBlockIn.addItems(blockList)
+
+        global half_blocksIn
+        half_blocksIn = QtWidgets.QCheckBox()
+        half_blocksLabel = QtWidgets.QLabel("Use half blocks:")
+        half_blocksLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+
+        global halfBlockTypeIn
+        halfBlockTypeIn = QtWidgets.QComboBox()
+        halfBlockTypeLabel = QtWidgets.QLabel("Half Block Type:")
+        halfBlockTypeLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        halfBlockTypeIn.addItems(half_blockList)
+
         global forestCheckIn
         forestCheckIn = QtWidgets.QCheckBox()
-        forestCheckLabel = QtWidgets.QLabel("Add Forest")
+        forestCheckLabel = QtWidgets.QLabel("Add Forest:")
+        forestCheckLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
         global forestFreqIn
         forestFreqIn = QtWidgets.QSpinBox()
-        forestFreqLabel = QtWidgets.QLabel("Forest Frequency")
+        forestFreqLabel = QtWidgets.QLabel("Forest Frequency:")
+        forestFreqLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         forestFreqIn.setValue(25)
         forestFreqIn.setMinimum(4)
 
         global treeTypesIn
         treeTypesIn = QtWidgets.QListWidget()
         treeTypesLabel = QtWidgets.QLabel("Tree Type(s)")
+        treeTypesLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         treeTypesIn.addItems(tree_list)
         treeTypesIn.setSelectionMode(QtWidgets.QListWidget.MultiSelection)
 
         global largeTreesIn
         largeTreesIn = QtWidgets.QCheckBox()
-        largeTreesLabel = QtWidgets.QLabel("Use Large Trees")
+        largeTreesLabel = QtWidgets.QLabel("Use Large Trees:")
+        largeTreesLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
         global largeTreesFreqIn
         largeTreesFreqIn = QtWidgets.QSpinBox()
-        largeTreesFreqLabel = QtWidgets.QLabel("Large Trees Frequency")
+        largeTreesFreqLabel = QtWidgets.QLabel("Large Trees Frequency:")
+        largeTreesFreqLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         largeTreesFreqIn.setValue(25)
         largeTreesFreqIn.setMinimum(1)
 
