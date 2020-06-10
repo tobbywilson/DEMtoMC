@@ -80,18 +80,21 @@ tree_list = [
 bedrock = anvil.Block('minecraft','bedrock')
 water = anvil.Block('minecraft','water')
 
-logFormat = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
-consoleLogger = logging.getLogger('consoleLog')
-fileLogger = logging.getLogger('fileLog')
+logFormat = "%(asctime)s - %(levelname)s: %(message)s"
+
+logToFile = logging.handlers.RotatingFileHandler('DEMtoMC.log',mode='a',maxBytes=5*1024*1024,backupCount=3)
+logToFile.setLevel(logging.DEBUG)
+
 logToConsole = logging.StreamHandler(sys.stdout)
-logToConsole.setFormatter(logFormat)
-logToFile = logging.handlers.RotatingFileHandler('DEMtoMC.log',mode='a',maxBytes=5*1024*1024)
-logToFile.setFormatter(logFormat)
-consoleLogger.addHandler(logToConsole)
-consoleLogger.setLevel(logging.INFO)
-fileLogger.addHandler(logToFile)
-fileLogger.setLevel(logging.DEBUG)
+logToConsole.setLevel(logging.INFO)
+
+
+logging.basicConfig(level=logging.DEBUG,
+                    format=logFormat,
+                    handlers=[logToFile,logToConsole])
+
+logger = logging.getLogger('DEMtoMC')
 
 
 class QTextEditLogger(logging.Handler):
@@ -146,8 +149,8 @@ class win(QtWidgets.QWidget):
 
         #self.executeLog = QTextEditLogger(self)
         #self.executeLog.setFormatter(logFormat)
-        #logging.getLogger().addHandler(self.executeLog)
-        #logging.getLogger().setLevel(logging.DEBUG)
+        #logger.getLogger().addHandler(self.executeLog)
+        #logger.getLogger().setLevel(logger.DEBUG)
 
         self.fileText = QtWidgets.QLabel("Choose a DEM file.")
         self.outLabel = QtWidgets.QLabel("Choose an output directory.")
@@ -349,10 +352,10 @@ class win(QtWidgets.QWidget):
 
     def debugCheckFunc(self):
         if self.sender().isChecked():
-            logToConsole.setLevel(logging.DEBUG)
-            logging.info("Changing to Debug Mode")
+            logToConsole.setLevel(logger.DEBUG)
+            logger.info("Changing to Debug Mode")
         else:
-            logging.info("Changing to Normal Mode")
+            logger.info("Changing to Normal Mode")
 
     def addRow(self):
         if self.sender().item(self.sender().rowCount()-1,0) is not None:
@@ -372,11 +375,11 @@ class win(QtWidgets.QWidget):
         if file == "":
             logging.info("No File Chosen. Please Choose a File")
         else:
-            logging.info(self.fileSelected)
             if not self.directorySelected:
                 global directory
                 directory = os.path.dirname(file)
                 self.outLabel.setText("Output Directory: {}".format(directory))
+                logging.info("Output Directory: {}".format(directory))
             self.run.setEnabled(True)
             self.fileSelected = True
             self.fileText.setText("DEM: {}".format(file))
@@ -638,7 +641,7 @@ class win(QtWidgets.QWidget):
                 useFeatures = False
         else:
             useFeatures = False
-        logging.debug("Using Features: {}".format(features))
+        logging.debug("Using Features: {}".format(useFeatures))
 
         logging.debug("Data:\n{}".format(Data))
 
