@@ -546,6 +546,7 @@ class win(QtWidgets.QWidget):
 
 
         del demIn
+<<<<<<< HEAD
         if 'classifierIn' in globals():
             del classifierIn
         if 'featuresHeightsIn' in globals():
@@ -553,6 +554,9 @@ class win(QtWidgets.QWidget):
         if 'featuresIn' in globals():
             del featuresIn
 
+=======
+        del ClassifierIn
+>>>>>>> 93b093821de142784a14bbee99f8bc4791a7d169
 
         logging.info("Scaling Horizontally")
 
@@ -583,8 +587,12 @@ class win(QtWidgets.QWidget):
         logging.info("Scaling Vertically")
 
         del dem
+<<<<<<< HEAD
         if 'classifier' in globals():
             del classifier
+=======
+        del classifier
+>>>>>>> 93b093821de142784a14bbee99f8bc4791a7d169
 
         def vert_scale(number,scale=scaleV):
             return number/scale
@@ -777,6 +785,7 @@ class win(QtWidgets.QWidget):
         self.run.setEnabled(True)
 
         del Data
+<<<<<<< HEAD
         if 'Classifier' in globals():
             del Classifier
         if 'classifierDict' in globals():
@@ -788,6 +797,9 @@ class win(QtWidgets.QWidget):
         if 'FeaturesHeights' in globals():
             del FeaturesHeights
 
+=======
+        del Classifier
+>>>>>>> 93b093821de142784a14bbee99f8bc4791a7d169
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
