@@ -703,7 +703,9 @@ class win(QtWidgets.QWidget):
                                                     numberOfBlocks += 1
                                             else:
                                                 featureBool = False
-                                        if random.randrange(forestFreq) == 0 and forest and classifierDict[Classifier.iloc[x,z]] == ('dirt' or 'grass_block' or 'podzol') and featureBool == False:
+                                        else:
+                                            featureBool = False
+                                        if random.randrange(forestFreq) == 0 and forest and classifierDict[Classifier.iloc[x,z]] == ('dirt' or 'grass_block' or 'podzol') and not featureBool:
                                             tree = random.choice(treeTypes).text()
                                             if (tree == 'dark_oak' or ((tree == 'jungle' or tree == 'spruce') and random.randrange(largeTreesFreq) == 0 and largeTrees)) and (x != (0 or 511) and z != (0 or 511)):
                                                 if x+1 < x_len and z+1 < z_len:
