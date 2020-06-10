@@ -189,6 +189,11 @@ class win(QtWidgets.QWidget):
         scaleVIn.setValue(1)
         scaleVIn.setRange(1,16)
 
+        global autoScaleIn
+        autoScaleIn = QtWidgets.QCheckBox()
+        autoScaleLabel = QtWidgets.QLabel("Auto Vertical Scale:")
+        autoScaleLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+
         global waterLevelIn
         waterLevelIn = QtWidgets.QSpinBox()
         waterLabel = QtWidgets.QLabel("Water Level:")
@@ -279,6 +284,8 @@ class win(QtWidgets.QWidget):
         self.settingsLayout.addWidget(scaleHIn,0,1)
         self.settingsLayout.addWidget(scaleVLabel,1,0)
         self.settingsLayout.addWidget(scaleVIn,1,1)
+        self.settingsLayout.addWidget(autoScaleLabel,2,0)
+        self.settingsLayout.addWidget(autoScaleIn,2,1)
 
         self.settingsLayout.addWidget(waterLabel,0,2)
         self.settingsLayout.addWidget(waterLevelIn,0,3)
@@ -514,6 +521,7 @@ class win(QtWidgets.QWidget):
         treeTypes = treeTypesIn.selectedItems()
         largeTrees = largeTreesIn.isChecked()
         largeTreesFreq = largeTreesFreqIn.value()
+        autoScale = autoScaleIn.isChecked()
 
         if half_blocks:
             quant = 0.5
@@ -577,8 +585,6 @@ class win(QtWidgets.QWidget):
                 dataLists = data
             return dataLists
 
-
-
         data = pd.DataFrame(h_scale(dem,scaleH))
 
         if 'classifierFile' in globals():
@@ -597,6 +603,12 @@ class win(QtWidgets.QWidget):
         def vert_scale(number,scale=scaleV):
             return number/scale
 
+        if autoScale:
+            demHeight = max(data.max()) - min(data.min())
+            autoScaleV = np.ceil(demHeight/254)
+            scaleV = max(autoScaleV,scaleV)
+            baselineHeight = np.floor(1-min(data.min())/scaleV)
+
         if scaleV != 1:
             dataVScaled = data.applymap(vert_scale)
         else:
@@ -610,6 +622,9 @@ class win(QtWidgets.QWidget):
         Data = dataVScaled.applymap(flex_round)
 
         del dataVScaled
+        if max(Data.max()) > 255:
+            overTall = max(Data.max()) - 255
+            logging.error("Data {} blocks too tall, try increasing the vertical scale, or reducing the baseline height (even making it negative if necessary)".format(overTall))
 
         if ('classifierFile' and 'classifierDictIn') in globals():
             classifierDict = {}
