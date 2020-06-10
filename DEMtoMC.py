@@ -426,7 +426,7 @@ class win(QtWidgets.QWidget):
         classifier = np.rot90(np.flip(classifierIn.ReadAsArray(),1))
 
         del demIn
-        del ClassifierIn
+        del classifierIn
 
         logging.info("Scaling Horizontally")
 
