@@ -174,7 +174,7 @@ class win(QtWidgets.QWidget):
 
         global autoScaleIn
         autoScaleIn = QtWidgets.QCheckBox()
-        autoScaleLabel = QtWidgets.QLabel("Auto Vertical Scale:")
+        autoScaleLabel = QtWidgets.QLabel("Vertical AutoScale:")
         autoScaleLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
         global waterLevelIn
