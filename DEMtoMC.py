@@ -83,11 +83,12 @@ logFormat = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
 logToConsole = logging.StreamHandler(sys.stdout)
 logToConsole.setFormatter(logFormat)
-logToFile = logging.FileHandler('DEMtoMC.log',mode='w')
+logToFile = logging.RotatingFileHandler('DEMtoMC.log',mode='a',maxBytes=5*1024*1024)
 logToFile.setFormatter(logFormat)
 logging.getLogger().addHandler(logToConsole)
+logToConsole.setLevel(logging.INFO)
 logging.getLogger().addHandler(logToFile)
-logging.getLogger().setLevel(logging.INFO)
+logToFile.setLevel(logging.DEBUG)
 
 
 class QTextEditLogger(logging.Handler):
@@ -345,7 +346,7 @@ class win(QtWidgets.QWidget):
 
     def debugCheckFunc(self):
         if self.sender().isChecked():
-            logging.getLogger().setLevel(logging.DEBUG)
+            logToConsole.setLevel(logging.DEBUG)
             logging.info("Changing to Debug Mode")
         else:
             logging.info("Changing to Normal Mode")
@@ -546,7 +547,6 @@ class win(QtWidgets.QWidget):
 
 
         del demIn
-<<<<<<< HEAD
         if 'classifierIn' in globals():
             del classifierIn
         if 'featuresHeightsIn' in globals():
@@ -554,9 +554,6 @@ class win(QtWidgets.QWidget):
         if 'featuresIn' in globals():
             del featuresIn
 
-=======
-        del ClassifierIn
->>>>>>> 93b093821de142784a14bbee99f8bc4791a7d169
 
         logging.info("Scaling Horizontally")
 
@@ -587,12 +584,8 @@ class win(QtWidgets.QWidget):
         logging.info("Scaling Vertically")
 
         del dem
-<<<<<<< HEAD
         if 'classifier' in globals():
             del classifier
-=======
-        del classifier
->>>>>>> 93b093821de142784a14bbee99f8bc4791a7d169
 
         def vert_scale(number,scale=scaleV):
             return number/scale
@@ -817,9 +810,6 @@ class win(QtWidgets.QWidget):
         if 'FeaturesHeights' in globals():
             del FeaturesHeights
 
-=======
-        del Classifier
->>>>>>> 93b093821de142784a14bbee99f8bc4791a7d169
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
