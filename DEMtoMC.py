@@ -717,19 +717,7 @@ class win(QtWidgets.QWidget):
                                     else:
                                         region.set_block(topBlock, x, y, z)
                                         numberOfBlocks += 1
-                                        if useFeatures:
-                                            if featuresDict[Features.iloc[x,z]] != (0 or 'None') or featuresDict[Features.iloc[x,z]] is not None:
-                                                featureBool = True
-                                                featureBlock = anvil.Block(featuresDict[Features.iloc[x,z]])
-                                                for h in range(FeaturesHeights.iloc[x,z]):
-                                                    yObj = y + 1 + h
-                                                    region.set_block(featureBlock,x,yObj,z)
-                                                    numberOfBlocks += 1
-                                            else:
-                                                featureBool = False
-                                        else:
-                                            featureBool = False
-                                        if random.randrange(forestFreq) == 0 and forest and classifierDict[Classifier.iloc[x,z]] == ('dirt' or 'grass_block' or 'podzol') and not featureBool:
+                                        if random.randrange(forestFreq) == 0 and forest and classifierDict[Classifier.iloc[x,z]] == ('dirt' or 'grass_block' or 'podzol'):
                                             tree = random.choice(treeTypes).text()
                                             if (tree == 'dark_oak' or ((tree == 'jungle' or tree == 'spruce') and random.randrange(largeTreesFreq) == 0 and largeTrees)) and (x != (0 or 511) and z != (0 or 511)):
                                                 if x+1 < x_len and z+1 < z_len:
@@ -780,6 +768,14 @@ class win(QtWidgets.QWidget):
                                                 region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
                                                 numberOfBlocks += 1
                                                 #logging.info(tree)
+                                        if useFeatures:
+                                            if featuresDict[Features.iloc[x,z]] != (0 or 'None') or featuresDict[Features.iloc[x,z]] is not None:
+                                                featureBool = True
+                                                featureBlock = anvil.Block(featuresDict[Features.iloc[x,z]])
+                                                for h in range(FeaturesHeights.iloc[x,z]):
+                                                    yObj = y + 1 + h
+                                                    region.set_block(featureBlock,x,yObj,z)
+                                                    numberOfBlocks += 1
                             else:
                                 for y in range(yRange):
                                     if y == 0:
