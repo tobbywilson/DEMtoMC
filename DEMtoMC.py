@@ -32,6 +32,9 @@ import anvil
 #Random number generation
 import random
 
+#Execution Timing
+import time
+
 quant = 0.5
 
 def flex_round(number):
@@ -343,6 +346,9 @@ class win(QtWidgets.QWidget):
     def debugCheckFunc(self):
         if self.sender().isChecked():
             logging.getLogger().setLevel(logging.DEBUG)
+            logging.info("Changing to Debug Mode")
+        else:
+            logging.info("Changing to Normal Mode")
 
     def addRow(self):
         if self.sender().item(self.sender().rowCount()-1,0) is not None:
@@ -481,6 +487,9 @@ class win(QtWidgets.QWidget):
         #logging.getLogger().addHandler(self.executeLog)
         #logging.getLogger().setLevel(logging.DEBUG)
         self.run.setEnabled(False)
+
+        start = time.perf_counter()
+
         logging.info("Setting Parameters")
 
         waterLevel = waterLevelIn.value()
@@ -687,7 +696,7 @@ class win(QtWidgets.QWidget):
                                                     region.set_block(featureBlock,x,yObj,z)
                                             else:
                                                 featureBool = False
-                                        if random.randrange(forestFreq) == 0 and forest and classifierDict[Classifier.iloc[x,z]] == ('dirt' or 'grass_block' or 'podzol') and feature is False:
+                                        if random.randrange(forestFreq) == 0 and forest and classifierDict[Classifier.iloc[x,z]] == ('dirt' or 'grass_block' or 'podzol') and featureBool == False:
                                             tree = random.choice(treeTypes).text()
                                             if (tree == 'dark_oak' or ((tree == 'jungle' or tree == 'spruce') and random.randrange(largeTreesFreq) == 0 and largeTrees)) and (x != (0 or 511) and z != (0 or 511)):
                                                 if x+1 < x_len and z+1 < z_len:
@@ -763,7 +772,8 @@ class win(QtWidgets.QWidget):
                     del region
         except:
             logging.exception("There was an error in processing at point {}, ~, {}. The Data value is {}".format(x,z,Data[x,z]))
-        logging.info("Done")
+        finish = time.perf_counter()
+        logging.info("Done. Took: {}".format(finish-start))
         self.run.setEnabled(True)
 
         del Data
