@@ -532,7 +532,7 @@ class win(QtWidgets.QWidget):
                                         region.set_block(block, x, y, z)
                                     else:
                                         region.set_block(topBlock, x, y, z)
-                                        if random.randrange(forestFreq) == 0 and forest:
+                                        if random.randrange(forestFreq) == 0 and forest and classifierDict[Classifier.iloc[x,z]] == ('dirt' or 'grass_block' or 'podzol'):
                                             tree = random.choice(treeTypes).text()
                                             if (tree == 'dark_oak' or ((tree == 'jungle' or tree == 'spruce') and random.randrange(largeTreesFreq) == 0 and largeTrees)) and (x != (0 or 511) and z != (0 or 511)):
                                                 if x+1 < x_len and z+1 < z_len:
