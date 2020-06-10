@@ -343,6 +343,8 @@ class win(QtWidgets.QWidget):
             classifierBlock = QtWidgets.QTableWidgetItem(classifierDictFromFile.iloc[i,1])
             classifierDictIn.setItem(i,0,classifierId)
             classifierDictIn.setItem(i,1,classifierBlock)
+        del classifierDictFromFile
+        del classifierDictFile
 
     def saveClassifierDictFile(self):
         classifierDictFileDialog = QtWidgets.QFileDialog(self)
@@ -356,6 +358,8 @@ class win(QtWidgets.QWidget):
                     classifierDict.append([int(itemKey.text()),itemBlock.text()])
         classifierDictOut = pd.DataFrame(classifierDict)
         classifierDictOut.to_csv(classifierDictFile[0],index=False,header=False)
+        del classifierDictOut
+        del classifierDictFile
 
     def selDirect(self):
         global directory
@@ -422,6 +426,7 @@ class win(QtWidgets.QWidget):
         classifier = np.rot90(np.flip(classifierIn.ReadAsArray(),1))
 
         del demIn
+        del ClassifierIn
 
         logging.info("Scaling Horizontally")
 
@@ -445,6 +450,8 @@ class win(QtWidgets.QWidget):
 
         logging.info("Scaling Vertically")
 
+        del dem
+        del classifier
 
         def vert_scale(number,scale=scaleV):
             return number/scale
@@ -605,6 +612,8 @@ class win(QtWidgets.QWidget):
         self.run.setEnabled(True)
 
         del Data
+        del Classifier
+        del classifierDict
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
