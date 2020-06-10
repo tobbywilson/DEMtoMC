@@ -617,10 +617,12 @@ class win(QtWidgets.QWidget):
             return number/scale
 
         if autoScale:
+            logging.info("Autoscaling")
             demHeight = max(data.max()) - min(data.min())
             autoScaleV = np.ceil(demHeight/254)
             scaleV = max(autoScaleV,scaleV)
             baselineHeight = np.floor(1-min(data.min())/scaleV)
+            logging.info("Vertical Scale: {}, Baseline Height: {}".format(scaleV,baselineHeight))
 
         if scaleV != 1:
             dataVScaled = data.applymap(vert_scale)
@@ -635,9 +637,9 @@ class win(QtWidgets.QWidget):
         Data = dataVScaled.applymap(flex_round)
 
         del dataVScaled
-        if max(Data.max()) > 255:
+        if max(Data.max())/scaleV + baselineHeight > 255:
             overTall = max(Data.max()) - 255
-            logging.error("Data {} blocks too tall, try increasing the vertical scale, or reducing the baseline height (even making it negative if necessary)".format(overTall))
+            logging.wanring("Data {} blocks too tall, try increasing the vertical scale, or reducing the baseline height (even making it negative if necessary), or use the AutoScale option. I will truncate any too tall stacks.".format(overTall))
 
         if ('classifierFile' and 'classifierDictIn') in globals():
             classifierDict = {}
