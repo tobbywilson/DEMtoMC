@@ -707,8 +707,12 @@ class win(QtWidgets.QWidget):
                             x = Regionx + xRegion*512
                             z = Regionz + zRegion*512
                             if classified:
-                                topBlock = anvil.Block('minecraft',classifierDict[Classifier.iloc[x,z]])
-                            yRange = int(Data.iloc[x,z]+baselineHeight)
+                                topBlockName = classifierDict[Classifier.iloc[x,z]]
+                                topBlock = anvil.Block('minecraft',topBlockName)
+                            if Data.iloc[x,z] + baselineHeight < 255:
+                                yRange = int(Data.iloc[x,z]+baselineHeight)
+                            else:
+                                yRange = 255
                             if z%512 == 0 and x%64 == 0:
                                 logging.info('Current Rows: {} to {} of {}, Columns: {} to {} of {}, Blocks before now: {}, Region: {}, {}'.format(z,min(z+511,z_len),z_len,x,min(x+63,x_len),x_len,numberOfBlocks,xRegion,zRegion))
                             if z%512 == 0 and x%64 != 0:
