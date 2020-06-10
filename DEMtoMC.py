@@ -422,6 +422,7 @@ class win(QtWidgets.QWidget):
         classifier = np.rot90(np.flip(classifierIn.ReadAsArray(),1))
 
         del demIn
+        del ClassifierIn
 
         logging.info("Scaling Horizontally")
 
@@ -445,6 +446,8 @@ class win(QtWidgets.QWidget):
 
         logging.info("Scaling Vertically")
 
+        del dem
+        del classifier
 
         def vert_scale(number,scale=scaleV):
             return number/scale
@@ -605,6 +608,7 @@ class win(QtWidgets.QWidget):
         self.run.setEnabled(True)
 
         del Data
+        del Classifier
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
