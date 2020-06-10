@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 #logging
 import sys
 import logging
+import logging.handlers
 
 #miscellaneous file functions
 import os
@@ -81,14 +82,16 @@ water = anvil.Block('minecraft','water')
 
 logFormat = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
+consoleLogger = logging.getLogger('consoleLog')
+fileLogger = logging.getLogger('fileLog')
 logToConsole = logging.StreamHandler(sys.stdout)
 logToConsole.setFormatter(logFormat)
-logToFile = logging.RotatingFileHandler('DEMtoMC.log',mode='a',maxBytes=5*1024*1024)
+logToFile = logging.handlers.RotatingFileHandler('DEMtoMC.log',mode='a',maxBytes=5*1024*1024)
 logToFile.setFormatter(logFormat)
-logging.getLogger().addHandler(logToConsole)
-logToConsole.setLevel(logging.INFO)
-logging.getLogger().addHandler(logToFile)
-logToFile.setLevel(logging.DEBUG)
+consoleLogger.addHandler(logToConsole)
+consoleLogger.setLevel(logging.INFO)
+fileLogger.addHandler(logToFile)
+fileLogger.setLevel(logging.DEBUG)
 
 
 class QTextEditLogger(logging.Handler):
@@ -342,7 +345,7 @@ class win(QtWidgets.QWidget):
         self.saveClassifierDict.clicked.connect(self.saveClassifierDictFile)
         self.openFeaturesDict.clicked.connect(self.openFeaturesDictFile)
         self.saveFeaturesDict.clicked.connect(self.saveFeaturesDictFile)
-        self.debugCheck.stateChanged.connect()
+        self.debugCheck.stateChanged.connect(self.debugCheckFunc)
 
     def debugCheckFunc(self):
         if self.sender().isChecked():
@@ -490,6 +493,7 @@ class win(QtWidgets.QWidget):
         self.run.setEnabled(False)
 
         start = time.perf_counter()
+        numberOfBlocks = 0
 
         logging.info("Setting Parameters")
 
