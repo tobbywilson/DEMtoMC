@@ -685,16 +685,21 @@ class win(QtWidgets.QWidget):
                                 pass
                             elif Data.iloc[x,z] <= waterLevel:
                                 region.set_block(bedrock, x, 0, z)
+                                numberOfBlocks += 1
                                 for y in range(1,waterHeight):
                                     region.set_block(water, x, y, z)
+                                    numberOfBlocks += 1
                             elif Data.iloc[x,z]%1 == 0 or half_blocks == False:
                                 for y in range(yRange):
                                     if y == 0:
                                         region.set_block(bedrock, x, y, z)
+                                        numberOfBlocks += 1
                                     elif y != yRange - 1:
                                         region.set_block(block, x, y, z)
+                                        numberOfBlocks += 1
                                     else:
                                         region.set_block(topBlock, x, y, z)
+                                        numberOfBlocks += 1
                                         if useFeatures:
                                             if featuresDict[Features.iloc[x,z]] != (0 or 'None') or featuresDict[Features.iloc[x,z]] is not None:
                                                 featureBool = True
@@ -702,6 +707,7 @@ class win(QtWidgets.QWidget):
                                                 for h in range(FeaturesHeights.iloc[x,z]):
                                                     yObj = y + 1 + h
                                                     region.set_block(featureBlock,x,yObj,z)
+                                                    numberOfBlocks += 1
                                             else:
                                                 featureBool = False
                                         if random.randrange(forestFreq) == 0 and forest and classifierDict[Classifier.iloc[x,z]] == ('dirt' or 'grass_block' or 'podzol') and featureBool == False:
@@ -726,37 +732,48 @@ class win(QtWidgets.QWidget):
                                                 if sqRD:
                                                     for x,z in zip([x,x,x+1,x+1],[z,z+1,z,z+1]):
                                                         region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
+                                                        numberOfBlocks += 1
                                                         #logging.info(tree+' large')
                                                 elif sqLD:
                                                     for x,z in zip([x,x,x-1,x-1],[z,z+1,z,z+1]):
                                                         region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
+                                                        numberOfBlocks += 1
                                                         #logging.info(tree+' large')
                                                 elif sqLU:
                                                     for x,z in zip([x,x,x-1,x-1],[z,z-1,z,z-1]):
                                                         region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
+                                                        numberOfBlocks += 1
                                                         #logging.info(tree+' large')
                                                 elif sqRU:
                                                     for x,z in zip([x,x,x+1,x+1],[z,z-1,z,z-1]):
                                                         region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
+                                                        numberOfBlocks += 1
                                                         #logging.info(tree+' large')
                                                 elif tree == 'dark_oak':
                                                     region.set_block(anvil.Block('minecraft','oak_sapling'),x,y+1,z)
+                                                    numberOfBlocks += 1
                                                     #logging.info('dark oak failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
                                                 else:
                                                     region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
+                                                    numberOfBlocks += 1
                                                     #logging.info('large tree failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
                                             else:
                                                 region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
+                                                numberOfBlocks += 1
                                                 #logging.info(tree)
                             else:
                                 for y in range(yRange):
                                     if y == 0:
                                         region.set_block(bedrock, x, y, z)
+                                        numberOfBlocks += 1
                                     elif y != yRange - 1:
                                         region.set_block(block, x, y, z)
+                                        numberOfBlocks += 1
                                     else:
                                         region.set_block(block, x, y, z)
+                                        numberOfBlocks += 1
                                         region.set_block(halfBlock, x, yRange, z)
+                                        numberOfBlocks += 1
                     #if xRegion == xRegions - 1 or zRegion == zRegions - 1:
                     #    if x_len%512 != 0:
                     #        for x in range(x_len,xRegions*512):
@@ -764,16 +781,20 @@ class win(QtWidgets.QWidget):
                     #                if (x%16 == 0 and z%16 == 0):
                     #                    logging.info('Current Chunk: {},~,{}'.format(int(x/16),int(z/16)))
                     #                region.set_block(bedrock, x, 0, z)
+                    #                numberOfBlocks += 1
                     #                for y in range(1,waterHeight):
                     #                    region.set_block(water, x, y, z)
+                    #                    numberOfBlocks += 1
                     #    if z_len%512 !=0:
                     #        for z in range(z_len,zRegions*512):
                     #            for x in range((xRegion)*512,(xRegion+1)*512):
                     #                if (x%16 == 0 and z%16 == 0):
                     #                    logging.info('Current Chunk: {},~,{}'.format(int(x/16),int(z/16)))
                     #                region.set_block(bedrock, x, 0, z)
+                    #                numberOfBlocks += 1
                     #                for y in range(1,waterHeight):
                     #                    region.set_block(water, x, y, z)
+                    #                    numberOfBlocks += 1
 
                     logging.info("Saving Minecraft Region: {}, {}: {}/r.{}.{}.mca".format(xRegion,zRegion,directory,xRegion,zRegion))
                     region.save('{}/r.{}.{}.mca'.format(directory,xRegion,zRegion))
@@ -781,11 +802,10 @@ class win(QtWidgets.QWidget):
         except:
             logging.exception("There was an error in processing at point {}, ~, {}. The Data value is {}".format(x,z,Data[x,z]))
         finish = time.perf_counter()
-        logging.info("Done. Took: {}".format(finish-start))
+        logging.info("Done. Wrote {} blocks, taking {}s".format(numberOfBlocks,finish-start))
         self.run.setEnabled(True)
 
         del Data
-<<<<<<< HEAD
         if 'Classifier' in globals():
             del Classifier
         if 'classifierDict' in globals():
