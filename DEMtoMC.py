@@ -679,8 +679,10 @@ class win(QtWidgets.QWidget):
                             if classified:
                                 topBlock = anvil.Block('minecraft',classifierDict[Classifier.iloc[x,z]])
                             yRange = int(Data.iloc[x,z]+baselineHeight)
-                            if z%512 == 0:
-                                logging.debug('Current Rows: {} to {} of {}, Column: {} of {}, Region: {}, {}'.format(z,min(z+511,z_len),z_len,x,x_len,xRegion,zRegion))
+                            if z%512 == 0 and x%64 == 0:
+                                logging.debug('Current Rows: {} to {} of {}, Columns: {} to {} of {}, Blocks before now: {}, Region: {}, {}'.format(z,min(z+511,z_len),z_len,x,min(x+63,x_len),x_len,numberOfBlocks,xRegion,zRegion))
+                            if z%512 == 0 and x%64 != 0:
+                                logging.debug('Current Rows: {} to {} of {}, Column: {} of {}, Blocks before now: {}, Region: {}, {}'.format(z,min(z+511,z_len),z_len,x,x_len,numberOfBlocks,xRegion,zRegion))
                             if Data.iloc[x,z] == -9999:
                                 pass
                             elif Data.iloc[x,z] <= waterLevel:
