@@ -810,6 +810,7 @@ class win(QtWidgets.QWidget):
                                         numberOfBlocks += 1
                                         region.set_block(halfBlock, x, yRange, z)
                                         numberOfBlocks += 1
+                    #Previous code for completing the region to avoid having large gaps at the edges.
                     #if xRegion == xRegions - 1 or zRegion == zRegions - 1:
                     #    if x_len%512 != 0:
                     #        for x in range(x_len,xRegions*512):
