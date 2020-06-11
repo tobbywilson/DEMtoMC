@@ -736,9 +736,11 @@ class win(QtWidgets.QWidget):
                                     else:
                                         region.set_block(topBlock, x, y, z)
                                         numberOfBlocks += 1
-                                        if random.randrange(forestFreq) == 0 and forest and classifierDict[Classifier.iloc[x,z]] == ('dirt' or 'grass_block' or 'podzol'):
+                                        if x%512==0 and z%64==0:
+                                            logging.debug("{}{}{}".format(random.randrange(forestFreq) == 0,forest,topBlockName in ('dirt','grass_block','podzol')))
+                                        if random.randrange(forestFreq) == 0 and forest and topBlockName in ('dirt','grass_block','podzol'):
                                             tree = random.choice(treeTypes).text()
-                                            if (tree == 'dark_oak' or ((tree == 'jungle' or tree == 'spruce') and random.randrange(largeTreesFreq) == 0 and largeTrees)) and (x != (0 or 511) and z != (0 or 511)):
+                                            if (tree == 'dark_oak' or ((tree == 'jungle' or tree == 'spruce') and random.randrange(largeTreesFreq) == 0 and largeTrees)) and (x not in (0,511) and z not in (0,511)):
                                                 if x+1 < x_len and z+1 < z_len:
                                                     sqRD = (Data.iloc[x+1,z] and Data.iloc[x,z+1] and Data.iloc[x+1,z+1]) == Data.iloc[x,z]
                                                 else:
