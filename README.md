@@ -10,7 +10,7 @@ See `requiremens.txt`
 
 Note: `GDAL` is not always possible to install with `pip` without a pre-downloaded `.whl` file. Files can be downloaded (unofficially) here: https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal
 
-#[QuickStart Guide][1]
+## [QuickStart Guide][1]
 
 ## License
 This software is made available under the GNU LGPL 3.0 License.
