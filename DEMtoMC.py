@@ -36,13 +36,17 @@ import random
 #Execution Timing
 import time
 
-#Config parsing
+#Config/argument parsing
 import configparser
+import argparse
 
-if 'nogui' in sys.argv:
-    gui = False
-else:
-    gui = True
+arg_parser = argparse.ArgumentParser(description='Generate a minecraft world from GeoData.')
+arg_parser.add_argument('--nogui',help = 'run without the GUI',action='store_false')
+arg_parser.add_argument('--config',help = 'select the config section. Default:DEFAULT',default='DEFAULT')
+args = arg_parser.parse_args()
+
+config_settings_section = vars(args)['config']
+gui = vars(args)['nogui']
 
 config = configparser.ConfigParser()
 
@@ -76,7 +80,7 @@ def saveToConfig(section,settings):
     config_file.close()
 
 if os.path.isfile('DEMtoMC.ini'):
-    loadFromConfig('DEFAULT')
+    settings = loadFromConfig(config_settings_section)
     config_file_bool = True
 else:
     config_file_bool = False
@@ -146,7 +150,6 @@ logging.basicConfig(level=logging.DEBUG,
                     handlers=[log_to_file,log_to_console])
 
 logger = logging.getLogger('DEMtoMC')
-
 
 class QTextEditLogger(logging.Handler):
     def __init__(self, parent):
@@ -435,7 +438,8 @@ class win(QtWidgets.QWidget):
         classifier_dict_in.cellChanged.connect(self.addRow)
 
         if config_file_bool:
-            self.setFromConfig('DEFAULT')
+            global config_settings_section
+            self.setFromConfig(config_settings_section)
 
     def executeFromGui(self):
         self.run.setEnabled(False)
@@ -486,7 +490,7 @@ class win(QtWidgets.QWidget):
         use_large_trees_in.setChecked(settings['use_large_trees'])
         large_trees_freq_in.setValue(settings['large_trees_freq'])
 
-        classifier_dict_from_file = openClassifierDictFile(settings['classifier_dict_file'])
+        classifier_dict_from_file = openDictFile(settings['classifier_dict_file'])
         if classifier_dict_from_file is not None:
             for i in range(len(classifier_dict_from_file)):
                 classifier_id = QtWidgets.QTableWidgetItem(str(classifier_dict_from_file.iloc[i,0]))
@@ -494,7 +498,7 @@ class win(QtWidgets.QWidget):
                 classifier_dict_in.setItem(i,0,classifier_id)
                 classifier_dict_in.setItem(i,1,classifier_block)
 
-        features_dict_from_file = openFeaturesDictFile(settings['features_dict_file'])
+        features_dict_from_file = openDictFile(settings['features_dict_file'])
         if features_dict_from_file is not None:
             for i in range(len(features_dict_from_file)):
                 features_id = QtWidgets.QTableWidgetItem(str(features_dict_from_file.iloc[i,0]))
@@ -597,7 +601,7 @@ class win(QtWidgets.QWidget):
         global settings
         classifier_dict_file_dialog = QtWidgets.QFileDialog(self)
         settings['classifier_dict_file'] = classifier_dict_file_dialog.getOpenFileName(self,'Open File','','CSV File (*.csv);;Any File (*)')[0]
-        classifier_dict_from_file = openClassifierDictFile(settings['classifier_dict_file'])
+        classifier_dict_from_file = openDictFile(settings['classifier_dict_file'])
         for i in range(len(classifier_dict_from_file)):
             classifier_id = QtWidgets.QTableWidgetItem(str(classifier_dict_from_file.iloc[i,0]))
             classifier_block = QtWidgets.QTableWidgetItem(classifier_dict_from_file.iloc[i,1])
@@ -608,14 +612,7 @@ class win(QtWidgets.QWidget):
         global settings
         classifier_dict_file_dialog = QtWidgets.QFileDialog(self)
         settings['classifier_dict_file'] = classifier_dict_file_dialog.getSaveFileName(self,'Save File','','CSV File (*.csv);;Any File (*)')[0]
-        classifier_dict = []
-        for i in range(classifier_dict_in.rowCount()):
-            item_key = classifier_dict_in.item(i,0)
-            item_block = classifier_dict_in.item(i,1)
-            if item_key is not None:
-                if item_block is not None:
-                    classifier_dict.append([int(item_key.text()),item_block.text()])
-        classifier_dict_out = pd.DataFrame(classifier_dict)
+        classifier_dict_out = tableWidgetToDF(classifier_dict_in)
         classifier_dict_out.to_csv(settings['classifier_dict_file'],index=False,header=False)
 
     def openFeaturesFile(self):
@@ -644,24 +641,18 @@ class win(QtWidgets.QWidget):
         global settings
         features_dict_file_dialog = QtWidgets.QFileDialog(self)
         settings['features_dict_file'] = features_dict_file_dialog.getOpenFileName(self,'Open File','','CSV File (*.csv);;Any File (*)')[0]
-        features_dict_from_file = openFeaturesDictFile(settings['features_dict_file'])
-        for i in range(len(features_dict_from_file)):
-            features_id = QtWidgets.QTableWidgetItem(str(features_dict_from_file.iloc[i,0]))
-            features_block = QtWidgets.QTableWidgetItem(features_dict_from_file.iloc[i,1])
-            features_dict_in.setItem(i,0,features_id)
-            features_dict_in.setItem(i,1,features_block)
+        features_dict_from_file = openDictFile(settings['features_dict_file'])
+        if features_dict_from_file is not None:
+            for i in range(len(features_dict_from_file)):
+                features_id = QtWidgets.QTableWidgetItem(str(features_dict_from_file.iloc[i,0]))
+                features_block = QtWidgets.QTableWidgetItem(features_dict_from_file.iloc[i,1])
+                features_dict_in.setItem(i,0,features_id)
+                features_dict_in.setItem(i,1,features_block)
 
     def saveFeaturesDictFile(self):
         features_dict_file_dialog = QtWidgets.QFileDialog(self)
         settings['features_dict_file'] = features_dict_file_dialog.getSaveFileName(self,'Save File','','CSV File (*.csv);;Any File (*)')[0]
-        features_dict = []
-        for i in range(features_dict_in.rowCount()):
-            item_key = features_dict_in.item(i,0)
-            item_block = features_dict_in.item(i,1)
-            if item_key is not None:
-                if item_block is not None:
-                    features_dict.append([int(item_key.text()),item_block.text()])
-        features_dict_out = pd.DataFrame(features_dict)
+        features_dict_out = tableWidgetToDF(features_dict_in)
         features_dict_out.to_csv(settings['features_dict_file'],index=False,header=False)
 
     def setDebugModeGUI(self):
@@ -679,25 +670,34 @@ def setDebugMode(debug_mode):
         else:
             log_to_console.setLevel(logging.INFO)
 
-def openFeaturesDictFile(features_dict_file):
-    if features_dict_file != '' and features_dict_file is not None:
-        features_dict_from_file = pd.read_csv(features_dict_file,header=None)
-        return features_dict_from_file
 
-def openClassifierDictFile(classifier_dict_file):
-    if classifier_dict_file != '' and classifier_dict_file is not None:
-        classifier_dict_from_file = pd.read_csv(classifier_dict_file,header=None)
-        return classifier_dict_from_file
+def openDictFile(dict_file):
+    if dict_file != '' and dict_file is not None:
+        dict_from_file = pd.read_csv(dict_file,header=None)
+        return dict_from_file
 
+def tableWidgetToDF(dict_in):
+    dict = []
+    for i in range(dict_in.rowCount()):
+        item_key = dict_in.item(i,0)
+        item_block = dict_in.item(i,1)
+        if item_key is not None:
+            if item_block is not None:
+                dict.append([int(item_key.text()),item_block.text()])
+    dict_out = pd.DataFrame(dict)
+    return dict_out
 
 def execute():
-
+    global gui
+    global settings
+    global classifier_dict_in
+    global features_dict_in
     #self.executeLog = QTextEditLogger(self)
     #self.executeLog.setFormatter(log_format)
     #logging.getLogger().addHandler(self.executeLog)
     #logging.getLogger().setLevel(logging.DEBUG)
 
-    global settings
+
 
     if settings['file'] == '' or settings['file'] is None:
         logging.critical('No DEM File Set. Please Set a File.')
@@ -861,14 +861,18 @@ def execute():
         over_tall = max(Data.max()) - 255
         logging.warning('Data {} blocks too tall, try increasing the vertical scale, or reducing the baseline height (even making it negative if necessary), or use the AutoScale option. I will truncate any too tall stacks.'.format(over_tall))
 
-    if ('classifier_file' and 'classifier_dict_in') in globals():
+    if bool(settings['classifier_file']):
         classifier_dict = {}
-        for i in range(classifier_dict_in.rowCount()):
-            item_key = classifier_dict_in.item(i,0)
-            item_block = classifier_dict_in.item(i,1)
+        if gui:
+            classifier_dict_in = tableWidgetToDF(classifier_dict_in)
+        else:
+            classifier_dict_in = openDictFile(settings['classifier_dict_file'])
+        for i in range(len(classifier_dict_in)):
+            item_key = classifier_dict_in.iloc[i,0]
+            item_block = classifier_dict_in.iloc[i,1]
             if item_key is not None:
                 if item_block is not None:
-                    classifier_dict[int(item_key.text())] = item_block.text()
+                    classifier_dict[int(item_key)] = item_block
         if bool(classifier_dict):
             classified = True
         else:
@@ -877,14 +881,18 @@ def execute():
         classified = False
     logging.debug('Classified: {}'.format(classified))
 
-    if bool('features_file'):
+    if bool(settings['features_file']):
         features_dict = {}
-        for i in range(features_dict_in.rowCount()):
-            item_key = features_dict_in.item(i,0)
-            item_block = features_dict_in.item(i,1)
+        if gui:
+            features_dict_in = tableWidgetToDF(features_dict_in)
+        else:
+            features_dict_in = openDictFile(settings['features_dict_file'])
+        for i in range(len(features_dict_in)):
+            item_key = features_dict_in.iloc[i,0]
+            item_block = features_dict_in.iloc[i,0]
             if item_key is not None:
                 if item_block is not None:
-                    features_dict[int(item_key.text())] = item_block.text()
+                    features_dict[int(item_key)] = item_block
         if bool(features_dict):
             use_features = True
         else:
@@ -1066,3 +1074,5 @@ if gui:
         widget.show()
 
         sys.exit(app.exec_())
+else:
+    execute()
