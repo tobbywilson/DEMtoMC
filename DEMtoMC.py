@@ -659,9 +659,9 @@ class win(QtWidgets.QWidget):
     def setDebugModeGUI(self):
             if self.sender().isChecked():
                 log_to_console.setLevel(logging.DEBUG)
-                logger.info('Changing to Debug Mode')
+                logger.info('Running in Debug Mode')
             else:
-                logger.info('Changing to Normal Mode')
+                logger.info('Running in Normal Mode')
                 log_to_console.setLevel(logging.INFO)
 
 def setDebugMode(debug_mode):
@@ -745,8 +745,9 @@ def execute():
     use_large_trees = settings['use_large_trees']
     large_trees_freq = settings['large_trees_freq']
     auto_scale = settings['auto_scale']
-    debug_mode = settings['debug_mode']
-    setDebugMode(debug_mode)
+    if not gui:
+        debug_mode = settings['debug_mode']
+        setDebugMode(debug_mode)
 
     water_height = water_level + baseline_height
 
@@ -918,7 +919,7 @@ def execute():
 
     logger.info('Regions: {}, {}'.format(x_regions, z_regions))
 
-    logger.debug('Local variables: {}\nGlobal Variables: {}'.format(locals(),globals()))
+    #logger.debug('Local variables: {}\nGlobal Variables: {}'.format(locals(),globals()))
 
     for x_region in range(x_regions):
         for z_region in range(z_regions):
@@ -943,7 +944,7 @@ def execute():
                     if z%512 == 0 and x%64 == 0:
                         logger.info('Current Rows: {} to {} of {}, Columns: {} to {} of {}, Blocks before now: {}, Region: {}, {}, Time: {}'.format(z,min(z+511,z_len),z_len,x,min(x+63,x_len),x_len,number_of_blocks,x_region,z_region,time.perf_counter()-start))
                     if z%512 == 0 and x%64 != 0:
-                        logger.debug('Current Rows: {} to {} of {}, Column: {} of {}, Blocks before now: {}, Region: {}, {}, Time: {}'.format(z,min(z+511,z_len),z_len,x,x_len,number_of_blocks,x_region,z_region,time.perf_counter()-start)))
+                        logger.debug('Current Rows: {} to {} of {}, Column: {} of {}, Blocks before now: {}, Region: {}, {}, Time: {}'.format(z,min(z+511,z_len),z_len,x,x_len,number_of_blocks,x_region,z_region,time.perf_counter()-start))
                     if Data.iloc[x,z] == -9999:
                         pass
                     elif Data.iloc[x,z] <= water_level:
@@ -1057,6 +1058,8 @@ def execute():
             #                for y in range(1,water_height):
             #                    region.set_block(water, x, y, z)
             #                    number_of_blocks += 1
+            logger.debug(locals())
+            logger.debug(globals())
 
             logger.info('Saving Minecraft Region: {}, {}: {}/r.{}.{}.mca'.format(x_region,z_region,directory,x_region,z_region))
             region.save('{}/r.{}.{}.mca'.format(directory,x_region,z_region))
