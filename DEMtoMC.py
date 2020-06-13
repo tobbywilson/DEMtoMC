@@ -9,8 +9,6 @@ Created on Tue Jun  2 17:55:53 2020
 import numpy as np
 import pandas as pd
 
-#Data visualisation
-import matplotlib.pyplot as plt
 
 #logging
 import sys
