@@ -283,6 +283,7 @@ class win(QtWidgets.QWidget):
         forest_freq_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         forest_freq_in.setValue(25)
         forest_freq_in.setMinimum(4)
+        forest_freq_in.setPrefix('1/')
 
         global tree_types_in
         tree_types_in = QtWidgets.QListWidget()
@@ -302,6 +303,7 @@ class win(QtWidgets.QWidget):
         large_trees_freq_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         large_trees_freq_in.setValue(25)
         large_trees_freq_in.setMinimum(1)
+        large_trees_freq_in.setPrefix('1/')
 
         global classifier_dict_in
         classifier_dict_in = QtWidgets.QTableWidget(1,2)
