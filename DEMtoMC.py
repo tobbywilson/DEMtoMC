@@ -67,7 +67,6 @@ def loadFromConfig(section):
     settings['use_large_trees'] = config[section]['use_large_trees'].lower() in ['true','yes','1','y','t']
     settings['large_trees_freq'] = int(config[section]['large_trees_freq'])
     settings['debug_mode'] = config[section]['debug_mode'].lower() in ['true','yes','1','y','t']
-    logging.debug(locals())
     return settings
 
 
@@ -562,13 +561,13 @@ class win(QtWidgets.QWidget):
         file_open_dialog = QtWidgets.QFileDialog(self)
         settings['file'] = file_open_dialog.getOpenFileName(self,'Open File','','GDAL Raster Formats (*.asc *.tif *.tiff *.adf *.ACE2 *.gen *.thf *.arg *.bsb *.bt *.ctg *.dds *.dimap *.doq1 *.doq2 *.e00grid *.hdr *.eir *.fits *.grd *.gxf *.ida *.mpr *.isce *.mem *.kro *.gis *.lan *.mff *.ndf *.gmt *.aux *.png *.pgm *.slc *.int *.gri *.sdat *.sdts *.sgi *.snodas *.hgt *.xpm *.gff *.zmap);;Any File (*)')[0]
         if settings['file'] == '':
-            logging.info('No File Chosen. Please Choose a File')
+            logger.info('No File Chosen. Please Choose a File')
         else:
-            logging.info('DEM: {}'.format(settings['file']))
+            logger.info('DEM: {}'.format(settings['file']))
             if not self.directorySelected:
                 settings['directory'] = os.path.dirname(settings['file'])
                 self.out_label.setText('Output Directory: {}'.format(settings['directory']))
-                logging.info('Output Directory: {}'.format(settings['directory']))
+                logger.info('Output Directory: {}'.format(settings['directory']))
             self.run.setEnabled(True)
             self.fileSelected = True
             self.file_label.setText('DEM: {}'.format(settings['file']))
@@ -578,24 +577,24 @@ class win(QtWidgets.QWidget):
         file_direct_dialog = QtWidgets.QFileDialog(self)
         settings['directory'] = file_direct_dialog.getExistingDirectory(self,'Select Output Directory')
         if settings['directory'] == '':
-            logging.info('No Directory Chosen. Please Choose a Directory')
+            logger.info('No Directory Chosen. Please Choose a Directory')
         else:
             if self.fileSelected:
                 self.run.setEnabled(True)
             self.directorySelected = True
             self.out_label.setText('Output Directory: {}'.format(settings['directory']))
-            logging.info('Output Directory: {}'.format(settings['directory']))
+            logger.info('Output Directory: {}'.format(settings['directory']))
 
     def openClassifierFile(self):
         global settings
         file_open_dialog = QtWidgets.QFileDialog(self)
         settings['classifier_file'] = file_open_dialog.getOpenFileName(self,'Open File','','GDAL Raster Formats (*.asc *.tif *.tiff *.adf *.ACE2 *.gen *.thf *.arg *.bsb *.bt *.ctg *.dds *.dimap *.doq1 *.doq2 *.e00grid *.hdr *.eir *.fits *.grd *.gxf *.ida *.mpr *.isce *.mem *.kro *.gis *.lan *.mff *.ndf *.gmt *.aux *.png *.pgm *.slc *.int *.gri *.sdat *.sdts *.sgi *.snodas *.hgt *.xpm *.gff *.zmap);;Any File (*)')[0]
-        if classifier_file == '':
-            logging.info('No File Chosen. Please Choose a File')
+        if settings['classifier_file'] == '':
+            logger.info('No File Chosen. Please Choose a File')
         else:
             self.rasterSelected = True
             self.open_classifier_label.setText('Classifier Raster: {}'.format(settings['classifier_file']))
-            logging.info('Classifier Raster: {}'.format(settings['classifier_file']))
+            logger.info('Classifier Raster: {}'.format(settings['classifier_file']))
 
     def openClassifierDictFileDialog(self):
         global settings
@@ -620,22 +619,22 @@ class win(QtWidgets.QWidget):
         file_open_dialog = QtWidgets.QFileDialog(self)
         settings['features_file'] = file_open_dialog.getOpenFileName(self,'Open File','','GDAL Raster Formats (*.asc *.tif *.tiff *.adf *.ACE2 *.gen *.thf *.arg *.bsb *.bt *.ctg *.dds *.dimap *.doq1 *.doq2 *.e00grid *.hdr *.eir *.fits *.grd *.gxf *.ida *.mpr *.isce *.mem *.kro *.gis *.lan *.mff *.ndf *.gmt *.aux *.png *.pgm *.slc *.int *.gri *.sdat *.sdts *.sgi *.snodas *.hgt *.xpm *.gff *.zmap);;Any File (*)')[0]
         if features_file == '':
-            logging.info('No File Chosen. Please Choose a File')
+            logger.info('No File Chosen. Please Choose a File')
         else:
             self.rasterSelected = True
             self.open_features_label.setText('Features Raster: {}'.format(settings['features_file']))
-            logging.info('Features Raster: {}'.format(settings['features_file']))
+            logger.info('Features Raster: {}'.format(settings['features_file']))
 
     def openFeaturesHeightsFile(self):
         global settings
         file_open_dialog = QtWidgets.QFileDialog(self)
         settings['features_heights_file'] = file_open_dialog.getOpenFileName(self,'Open File','','GDAL Raster Formats (*.asc *.tif *.tiff *.adf *.ACE2 *.gen *.thf *.arg *.bsb *.bt *.ctg *.dds *.dimap *.doq1 *.doq2 *.e00grid *.hdr *.eir *.fits *.grd *.gxf *.ida *.mpr *.isce *.mem *.kro *.gis *.lan *.mff *.ndf *.gmt *.aux *.png *.pgm *.slc *.int *.gri *.sdat *.sdts *.sgi *.snodas *.hgt *.xpm *.gff *.zmap);;Any File (*)')[0]
         if features_heights_file == '':
-            logging.info('No File Chosen. Please Choose a File')
+            logger.info('No File Chosen. Please Choose a File')
         else:
             self.rasterSelected = True
             self.open_features_heights_label.setText('Feature Heights Raster: {}'.format(settings['features_heights_file']))
-            logging.info('Feature Heights Raster: {}'.format(settings['features_heights_file']))
+            logger.info('Feature Heights Raster: {}'.format(settings['features_heights_file']))
 
     def openFeaturesDictFileDialog(self):
         global settings
@@ -700,12 +699,12 @@ def execute():
 
 
     if settings['file'] == '' or settings['file'] is None:
-        logging.critical('No DEM File Set. Please Set a File.')
+        logger.critical('No DEM File Set. Please Set a File.')
 
     start = time.perf_counter()
     number_of_blocks = 0
 
-    logging.info('Setting Parameters')
+    logger.info('Setting Parameters')
 
     if gui:
         settings['water_level'] = water_level_in.value()
@@ -758,23 +757,23 @@ def execute():
         quant = 1
 
     if scale_v == 0:
-        logging.warning('Vertical scale cannot be 0, please use a different value. Continuing with AutoScale.')
+        logger.warning('Vertical scale cannot be 0, please use a different value. Continuing with AutoScale.')
         auto_scale = True
 
     for block in [block_name,top_block_name]:
         if block not in all_blocks:
-            logging.warning('A block name used ({}), is not recognised as a valid block or fluid. I will try anyway, but may not succeed.'.format(block))
+            logger.warning('A block name used ({}), is not recognised as a valid block or fluid. I will try anyway, but may not succeed.'.format(block))
     if half_block_name not in all_blocks:
-        logging.warning('The half block name used ({}), is not recognised as a valid block. I will try anyway, but may not succeed.'.format(half_block_name))
+        logger.warning('The half block name used ({}), is not recognised as a valid block. I will try anyway, but may not succeed.'.format(half_block_name))
     elif half_block_name not in all_half_blocks:
-        logging.warning('The half block name used ({}), is not recognised as a valid half block. I will still succeed, but you may not achieve your desired result.'.format(half_block_name))
+        logger.warning('The half block name used ({}), is not recognised as a valid half block. I will still succeed, but you may not achieve your desired result.'.format(half_block_name))
 
 
     block = anvil.Block('minecraft',block_name)
     half_block = anvil.Block('minecraft',half_block_name)
     top_block = anvil.Block('minecraft',top_block_name)
 
-    logging.info('Horizontal Scale: {}\n \
+    logger.info('Horizontal Scale: {}\n \
     Vertical Scale: {}\n \
     Water Level: {}\n \
     Baseline Height: {}\n \
@@ -784,13 +783,13 @@ def execute():
     Using Half Blocks? {}\n\
     Output Directory: {}'.format(scale_h,scale_v,water_level,baseline_height,block_name,top_block_name,half_block_name,use_half_blocks,directory))
 
-    logging.info('Importing Data')
+    logger.info('Importing Data')
 
     dem_in = gdal.Open(file)
     dem = np.rot90(np.flip(dem_in.ReadAsArray(),1))
 
     if classifier_file != '':
-        logging.debug('Classifier file found')
+        logger.debug('Classifier file found')
         classifier_in = gdal.Open(classifier_file)
         classifier = np.rot90(np.flip(classifier_in.ReadAsArray(),1))
 
@@ -804,7 +803,7 @@ def execute():
 
     del dem_in
 
-    logging.info('Scaling Horizontally')
+    logger.info('Scaling Horizontally')
 
     def h_scale(data,scale_h):
         data_lists = []
@@ -827,7 +826,7 @@ def execute():
     if features_heights_file != '':
         Features_heights = pd.DataFrame(h_scale(features_heights,scale_h))
 
-    logging.info('Scaling Vertically')
+    logger.info('Scaling Vertically')
 
     del dem
 
@@ -836,30 +835,29 @@ def execute():
         return number/scale
 
     if auto_scale:
-        logging.info('Autoscaling')
+        logger.info('Autoscaling')
         demHeight = max(data.max()) - min(data.min())
         auto_scaleV = demHeight/254
         scale_v = max(auto_scaleV,scale_v)
         baseline_height = np.floor(1-min(data.min())/scale_v)
-        logging.info('Vertical Scale: {}, Baseline Height: {}'.format(scale_v,baseline_height))
+        logger.info('Vertical Scale: {}, Baseline Height: {}'.format(scale_v,baseline_height))
 
     if scale_v != 1:
         data_v_scaled = data.applymap(vert_scale)
     else:
         data_v_scaled = data
 
-    logging.info('Rounding elevations to nearest half metre')
+    logger.info('Rounding elevations to nearest half metre')
 
     del data
 
-    global Data
     Data = data_v_scaled.applymap(flex_round)
 
     del data_v_scaled
 
     if max(Data.max())/scale_v + baseline_height > 255:
         over_tall = max(Data.max()) - 255
-        logging.warning('Data {} blocks too tall, try increasing the vertical scale, or reducing the baseline height (even making it negative if necessary), or use the AutoScale option. I will truncate any too tall stacks.'.format(over_tall))
+        logger.warning('Data {} blocks too tall, try increasing the vertical scale, or reducing the baseline height (even making it negative if necessary), or use the AutoScale option. I will truncate any too tall stacks.'.format(over_tall))
 
     if bool(settings['classifier_file']):
         classifier_dict = {}
@@ -879,7 +877,7 @@ def execute():
             classified = False
     else:
         classified = False
-    logging.debug('Classified: {}'.format(classified))
+    logger.debug('Classified: {}'.format(classified))
 
     if bool(settings['features_file']):
         features_dict = {}
@@ -899,51 +897,51 @@ def execute():
             use_features = False
     else:
         use_features = False
-    logging.debug('Using Features: {}'.format(use_features))
+    logger.debug('Using Features: {}'.format(use_features))
 
-    logging.debug('Data:\n{}'.format(Data))
+    logger.debug('Data:\n{}'.format(Data))
 
-    logging.info('Finding DEM Size')
+    logger.info('Finding DEM Size')
 
     x_len = len(Data.iloc[:,0])
     z_len = len(Data.iloc[0,:])
 
-    logging.info('x size:{}\n \
+    logger.info('x size:{}\n \
                     z size:{}'.format(x_len,z_len))
 
-    logging.info('Calculating number of regions required')
+    logger.info('Calculating number of regions required')
 
     x_regions = int(np.ceil(x_len/512))
     z_regions = int(np.ceil(z_len/512))
 
-    logging.info('Regions: {}, {}'.format(x_regions, z_regions))
+    logger.info('Regions: {}, {}'.format(x_regions, z_regions))
 
-    logging.debug('Local variables: {}\nGlobal Variables: {}'.format(locals(),globals()))
+    logger.debug('Local variables: {}\nGlobal Variables: {}'.format(locals(),globals()))
 
     for x_region in range(x_regions):
         for z_region in range(z_regions):
 
-            logging.info('Creating Minecraft Region: {}, {}'.format(x_region,z_region))
+            logger.info('Creating Minecraft Region: {}, {}'.format(x_region,z_region))
 
             region = anvil.EmptyRegion(x_region,z_region)
 
-            logging.info('Region: {}, {}'.format(x_region,z_region))
+            logger.info('Region: {}, {}'.format(x_region,z_region))
 
             for region_x in range(min(512,x_len-(x_region)*512)):
                 for region_z in range(min(512,z_len-(z_region)*512)):
                     x = region_x + x_region*512
                     z = region_z + z_region*512
                     if classified:
-                        top_block_name = classifier_dict[Classifier.iloc[x,z]]
-                        top_block = anvil.Block('minecraft',top_block_name)
+                        top_block_name = str(classifier_dict[Classifier.iloc[x,z]])
+                        top_block = anvil.Block('minecraft',str(top_block_name))
                     if Data.iloc[x,z] + baseline_height < 255:
                         y_range = int(Data.iloc[x,z]+baseline_height)
                     else:
                         y_range = 255
                     if z%512 == 0 and x%64 == 0:
-                        logging.info('Current Rows: {} to {} of {}, Columns: {} to {} of {}, Blocks before now: {}, Region: {}, {}'.format(z,min(z+511,z_len),z_len,x,min(x+63,x_len),x_len,number_of_blocks,x_region,z_region))
+                        logger.info('Current Rows: {} to {} of {}, Columns: {} to {} of {}, Blocks before now: {}, Region: {}, {}, Time: {}'.format(z,min(z+511,z_len),z_len,x,min(x+63,x_len),x_len,number_of_blocks,x_region,z_region,time.perf_counter()-start))
                     if z%512 == 0 and x%64 != 0:
-                        logging.debug('Current Rows: {} to {} of {}, Column: {} of {}, Blocks before now: {}, Region: {}, {}'.format(z,min(z+511,z_len),z_len,x,x_len,number_of_blocks,x_region,z_region))
+                        logger.debug('Current Rows: {} to {} of {}, Column: {} of {}, Blocks before now: {}, Region: {}, {}, Time: {}'.format(z,min(z+511,z_len),z_len,x,x_len,number_of_blocks,x_region,z_region,time.perf_counter()-start)))
                     if Data.iloc[x,z] == -9999:
                         pass
                     elif Data.iloc[x,z] <= water_level:
@@ -986,36 +984,36 @@ def execute():
                                             for x,z in zip([x,x,x+1,x+1],[z,z+1,z,z+1]):
                                                 region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
                                                 number_of_blocks += 1
-                                                #logging.info(tree+' large')
+                                                #logger.info(tree+' large')
                                         elif sq_ld:
                                             for x,z in zip([x,x,x-1,x-1],[z,z+1,z,z+1]):
                                                 region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
                                                 number_of_blocks += 1
-                                                #logging.info(tree+' large')
+                                                #logger.info(tree+' large')
                                         elif sq_lu:
                                             for x,z in zip([x,x,x-1,x-1],[z,z-1,z,z-1]):
                                                 region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
                                                 number_of_blocks += 1
-                                                #logging.info(tree+' large')
+                                                #logger.info(tree+' large')
                                         elif sq_ru:
                                             for x,z in zip([x,x,x+1,x+1],[z,z-1,z,z-1]):
                                                 region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
                                                 number_of_blocks += 1
-                                                #logging.info(tree+' large')
+                                                #logger.info(tree+' large')
                                         elif tree == 'dark_oak':
                                             region.set_block(anvil.Block('minecraft','oak_sapling'),x,y+1,z)
                                             number_of_blocks += 1
-                                            #logging.info('dark oak failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
+                                            #logger.info('dark oak failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
                                         else:
                                             region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
                                             number_of_blocks += 1
-                                            #logging.info('large tree failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
+                                            #logger.info('large tree failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
                                     else:
                                         region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
                                         number_of_blocks += 1
-                                        #logging.info(tree)
                                 if use_features:
                                     if features_dict[Features.iloc[x,z]] != (0 or 'None') or features_dict[Features.iloc[x,z]] is not None:
+                                        #logger.info(tree)
                                         feature_bool = True
                                         feature_block = anvil.Block(features_dict[Features.iloc[x,z]])
                                         for h in range(Features_heights.iloc[x,z]):
@@ -1041,7 +1039,7 @@ def execute():
             #        for x in range(x_len,x_regions*512):
             #            for z in range((z_region)*512,(z_region+1)*512):
             #                if (x%16 == 0 and z%16 == 0):
-            #                    logging.info('Current Chunk: {},~,{}'.format(int(x/16),int(z/16)))
+            #                    logger.info('Current Chunk: {},~,{}'.format(int(x/16),int(z/16)))
             #                region.set_block(bedrock, x, 0, z)
             #                number_of_blocks += 1
             #                for y in range(1,water_height):
@@ -1051,18 +1049,18 @@ def execute():
             #        for z in range(z_len,z_regions*512):
             #            for x in range((x_region)*512,(x_region+1)*512):
             #                if (x%16 == 0 and z%16 == 0):
-            #                    logging.info('Current Chunk: {},~,{}'.format(int(x/16),int(z/16)))
+            #                    logger.info('Current Chunk: {},~,{}'.format(int(x/16),int(z/16)))
             #                region.set_block(bedrock, x, 0, z)
             #                number_of_blocks += 1
             #                for y in range(1,water_height):
             #                    region.set_block(water, x, y, z)
             #                    number_of_blocks += 1
 
-            logging.info('Saving Minecraft Region: {}, {}: {}/r.{}.{}.mca'.format(x_region,z_region,directory,x_region,z_region))
+            logger.info('Saving Minecraft Region: {}, {}: {}/r.{}.{}.mca'.format(x_region,z_region,directory,x_region,z_region))
             region.save('{}/r.{}.{}.mca'.format(directory,x_region,z_region))
             del region
     finish = time.perf_counter()
-    logging.info('Done. Wrote {} blocks, taking {:.2f}s'.format(number_of_blocks,finish-start))
+    logger.info('Done. Wrote {} blocks, taking {:.2f}s'.format(number_of_blocks,finish-start))
 
 if gui:
     if __name__ == '__main__':
