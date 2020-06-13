@@ -8,7 +8,7 @@ The script accepts any GDAL recognised raster format.
 ## Requirements
 See `requiremens.txt`
 
-Note: `GDAL` is not always possible to install with `pip` without a pre-downloaded `.whl` file. Files can be downloaded (unofficially) here: [[https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal]]
+Note: `GDAL` is not always possible to install with `pip` without a pre-downloaded `.whl` file. Files can be downloaded (unofficially) here: https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal
 
 #[QuickStart Guide][1]
 
