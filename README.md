@@ -1,5 +1,5 @@
 # DEMtoMC
-Scripts to Convert a DEM to a Minecraft world
+Script (with optional GUI) to Convert a DEM to a Minecraft world
 
 
 ## Requirements
