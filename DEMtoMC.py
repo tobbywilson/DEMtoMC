@@ -771,9 +771,9 @@ def execute():
         logger.warning('The half block name used ({}), is not recognised as a valid half block. I will still succeed, but you may not achieve your desired result.'.format(half_block_name))
 
 
-    block = anvil.Block('minecraft',block_name)
-    half_block = anvil.Block('minecraft',half_block_name)
-    top_block = anvil.Block('minecraft',top_block_name)
+    block = anvil.Block('minecraft',str(str(block_name)))
+    half_block = anvil.Block('minecraft',str(half_block_name))
+    top_block = anvil.Block('minecraft',str(top_block_name))
 
     logger.info('Horizontal Scale: {}\n \
     Vertical Scale: {}\n \
@@ -984,38 +984,38 @@ def execute():
 
                                         if sq_rd:
                                             for x,z in zip([x,x,x+1,x+1],[z,z+1,z,z+1]):
-                                                region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
+                                                region.set_block(anvil.Block('minecraft',str(tree+'_sapling')),x,y+1,z)
                                                 number_of_blocks += 1
                                                 #logger.info(tree+' large')
                                         elif sq_ld:
                                             for x,z in zip([x,x,x-1,x-1],[z,z+1,z,z+1]):
-                                                region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
+                                                region.set_block(anvil.Block('minecraft',str(tree+'_sapling')),x,y+1,z)
                                                 number_of_blocks += 1
                                                 #logger.info(tree+' large')
                                         elif sq_lu:
                                             for x,z in zip([x,x,x-1,x-1],[z,z-1,z,z-1]):
-                                                region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
+                                                region.set_block(anvil.Block('minecraft',str(tree+'_sapling')),x,y+1,z)
                                                 number_of_blocks += 1
                                                 #logger.info(tree+' large')
                                         elif sq_ru:
                                             for x,z in zip([x,x,x+1,x+1],[z,z-1,z,z-1]):
-                                                region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
+                                                region.set_block(anvil.Block('minecraft',str(tree+'_sapling')),x,y+1,z)
                                                 number_of_blocks += 1
                                                 #logger.info(tree+' large')
                                         elif tree == 'dark_oak':
-                                            region.set_block(anvil.Block('minecraft','oak_sapling'),x,y+1,z)
+                                            region.set_block(anvil.Block('minecraft',str('oak_sapling')),x,y+1,z)
                                             number_of_blocks += 1
                                             #logger.info('dark oak failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
                                         else:
-                                            region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
+                                            region.set_block(anvil.Block('minecraft',str(tree+'_sapling')),x,y+1,z)
                                             number_of_blocks += 1
                                             #logger.info('large tree failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
                                     else:
-                                        region.set_block(anvil.Block('minecraft',tree+'_sapling'),x,y+1,z)
+                                        region.set_block(anvil.Block('minecraft',str(tree+'_sapling')),x,y+1,z)
                                         number_of_blocks += 1
-                                if use_features:
-                                    if features_dict[Features.iloc[x,z]] != (0 or 'None') or features_dict[Features.iloc[x,z]] is not None:
                                         #logger.info(tree)
+                                if use_features and features_dict[Features.iloc[x,z]] is not None:
+                                    if str(features_dict[Features.iloc[x,z]]).lower() not in ('0','none'):
                                         feature_bool = True
                                         feature_block = anvil.Block(features_dict[Features.iloc[x,z]])
                                         for h in range(Features_heights.iloc[x,z]):
@@ -1060,7 +1060,6 @@ def execute():
 
             logger.info('Saving Minecraft Region: {}, {}: {}/r.{}.{}.mca'.format(x_region,z_region,directory,x_region,z_region))
             region.save('{}/r.{}.{}.mca'.format(directory,x_region,z_region))
-            del region
     finish = time.perf_counter()
     logger.info('Done. Wrote {} blocks, taking {:.2f}s'.format(number_of_blocks,finish-start))
 
