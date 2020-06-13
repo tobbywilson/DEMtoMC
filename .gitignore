@@ -127,6 +127,9 @@ dmypy.json
 *.asc
 *.prj
 *.tif
+dem.png
+CockatooIsland.tif.aux.xml
+CockatooIsland_clipped.asc.aux.xml
+dem_rounded.png
 *.ini
-!DEMtoMC.ini
 test.py
