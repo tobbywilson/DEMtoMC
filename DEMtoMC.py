@@ -455,6 +455,7 @@ class win(QtWidgets.QWidget):
 
         if settings['directory'] != '' and  settings['directory'] is not None:
             self.out_label.setText('Output Directory: {}'.format(settings['directory']))
+            self.directorySelected = True
             if self.fileSelected == True:
                 self.run.setEnabled(True)
 
@@ -524,6 +525,7 @@ class win(QtWidgets.QWidget):
         settings['use_large_trees'] = use_large_trees_in.isChecked()
         settings['large_trees_freq'] = large_trees_freq_in.value()
         settings['auto_scale'] = auto_scale_in.isChecked()
+        settings['debug_mode'] = self.debug_check.isChecked()
         if success and bool(config_section):
             saveToConfig(config_section,settings)
 
