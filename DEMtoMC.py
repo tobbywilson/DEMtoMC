@@ -55,6 +55,15 @@ config = configparser.ConfigParser()
 
 settings = {}
 
+trues = ['true', 'yes', '1', 'y', 't']
+gdal_formats = 'GDAL Raster Formats (*.asc *.tif *.tiff *.adf *.ACE2 *.gen'\
+               '*.thf *.arg *.bsb *.bt *.ctg *.dds *.dimap *.doq1 *.doq2'\
+               '*.e00grid *.hdr *.eir *.fits *.grd *.gxf *.ida *.mpr *.isce'\
+               '*.mem *.kro *.gis *.lan *.mff *.ndf *.gmt *.aux *.png *.pgm'\
+               '*.slc *.int *.gri *.sdat *.sdts *.sgi *.snodas *.hgt *.xpm'\
+               '*.gff *.zmap);;All Files (*.*)'
+
+
 def loadFromConfig(section):
     config.read('DEMtoMC.ini')
     settings = dict(config[section])
@@ -566,7 +575,10 @@ class win(QtWidgets.QWidget):
     def openFile(self):
         global settings
         file_open_dialog = QtWidgets.QFileDialog(self)
-        settings['file'] = file_open_dialog.getOpenFileName(self,'Open File','','GDAL Raster Formats (*.asc *.tif *.tiff *.adf *.ACE2 *.gen *.thf *.arg *.bsb *.bt *.ctg *.dds *.dimap *.doq1 *.doq2 *.e00grid *.hdr *.eir *.fits *.grd *.gxf *.ida *.mpr *.isce *.mem *.kro *.gis *.lan *.mff *.ndf *.gmt *.aux *.png *.pgm *.slc *.int *.gri *.sdat *.sdts *.sgi *.snodas *.hgt *.xpm *.gff *.zmap);;Any File (*)')[0]
+        settings['file'] = file_open_dialog.getOpenFileName(self,
+                                                            'Open File', '',
+                                                            gdal_formats
+                                                            )[0]
         if settings['file'] == '':
             logger.info('No File Chosen. Please Choose a File')
         else:
@@ -595,7 +607,10 @@ class win(QtWidgets.QWidget):
     def openClassifierFile(self):
         global settings
         file_open_dialog = QtWidgets.QFileDialog(self)
-        settings['classifier_file'] = file_open_dialog.getOpenFileName(self,'Open File','','GDAL Raster Formats (*.asc *.tif *.tiff *.adf *.ACE2 *.gen *.thf *.arg *.bsb *.bt *.ctg *.dds *.dimap *.doq1 *.doq2 *.e00grid *.hdr *.eir *.fits *.grd *.gxf *.ida *.mpr *.isce *.mem *.kro *.gis *.lan *.mff *.ndf *.gmt *.aux *.png *.pgm *.slc *.int *.gri *.sdat *.sdts *.sgi *.snodas *.hgt *.xpm *.gff *.zmap);;Any File (*)')[0]
+        settings['classifier_file'] = \
+            file_open_dialog.getOpenFileName(self, 'Open File', '',
+                                             gdal_formats
+                                             )[0]
         if settings['classifier_file'] == '':
             logger.info('No File Chosen. Please Choose a File')
         else:
@@ -624,8 +639,10 @@ class win(QtWidgets.QWidget):
     def openFeaturesFile(self):
         global settings
         file_open_dialog = QtWidgets.QFileDialog(self)
-        settings['features_file'] = file_open_dialog.getOpenFileName(self,'Open File','','GDAL Raster Formats (*.asc *.tif *.tiff *.adf *.ACE2 *.gen *.thf *.arg *.bsb *.bt *.ctg *.dds *.dimap *.doq1 *.doq2 *.e00grid *.hdr *.eir *.fits *.grd *.gxf *.ida *.mpr *.isce *.mem *.kro *.gis *.lan *.mff *.ndf *.gmt *.aux *.png *.pgm *.slc *.int *.gri *.sdat *.sdts *.sgi *.snodas *.hgt *.xpm *.gff *.zmap);;Any File (*)')[0]
-        if features_file == '':
+        settings['features_file'] = \
+            file_open_dialog.getOpenFileName(self, 'Open File', '',
+                                             gdal_formats
+                                             )[0]
             logger.info('No File Chosen. Please Choose a File')
         else:
             self.rasterSelected = True
@@ -635,8 +652,10 @@ class win(QtWidgets.QWidget):
     def openFeaturesHeightsFile(self):
         global settings
         file_open_dialog = QtWidgets.QFileDialog(self)
-        settings['features_heights_file'] = file_open_dialog.getOpenFileName(self,'Open File','','GDAL Raster Formats (*.asc *.tif *.tiff *.adf *.ACE2 *.gen *.thf *.arg *.bsb *.bt *.ctg *.dds *.dimap *.doq1 *.doq2 *.e00grid *.hdr *.eir *.fits *.grd *.gxf *.ida *.mpr *.isce *.mem *.kro *.gis *.lan *.mff *.ndf *.gmt *.aux *.png *.pgm *.slc *.int *.gri *.sdat *.sdts *.sgi *.snodas *.hgt *.xpm *.gff *.zmap);;Any File (*)')[0]
-        if features_heights_file == '':
+        settings['features_heights_file'] = \
+            file_open_dialog.getOpenFileName(self, 'Open File', '',
+                                             gdal_formats
+                                             )[0]
             logger.info('No File Chosen. Please Choose a File')
         else:
             self.rasterSelected = True
