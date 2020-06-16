@@ -1236,14 +1236,19 @@ def execute():
     for x_region in range(x_regions):
         for z_region in range(z_regions):
             region_index += 1
-            logger.info('Creating Region: {} ({}, {})'
-                        .format(region_index, x_region, z_region)
+            logger.info('Creating Region: {} of {} ({}, {})'
+                        .format(region_index, x_region * z_region,
+                                x_region, z_region
+                                )
                         )
 
             region = anvil.EmptyRegion(x_region, z_region)
 
-            logger.info('Region: {} ({}, {})'
-                        .format(region_index, x_region, z_region))
+            logger.info('Region: {} of {} ({}, {})'
+                        .format(region_index,  x_region * z_region,
+                                x_region, z_region
+                                )
+                        )
 
             for region_x in range(min(512, x_len-(x_region)*512)):
                 for region_z in range(min(512, z_len-(z_region)*512)):
