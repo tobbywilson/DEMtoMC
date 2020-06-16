@@ -332,7 +332,7 @@ class win(QtWidgets.QWidget):
 
         global forest_period_in
         forest_period_in = QtWidgets.QSpinBox()
-        forest_period_label = QtWidgets.QLabel('Forest Period:')
+        forest_period_label = QtWidgets.QLabel('Forest Frequency:')
         forest_period_label.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter
             )
@@ -356,7 +356,7 @@ class win(QtWidgets.QWidget):
 
         global large_trees_period_in
         large_trees_period_in = QtWidgets.QSpinBox()
-        large_trees_period_label = QtWidgets.QLabel('Large Trees Period:')
+        large_trees_period_label = QtWidgets.QLabel('Large Trees Frequency:')
         large_trees_period_label.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter
             )
