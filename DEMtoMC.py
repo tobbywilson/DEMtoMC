@@ -726,6 +726,87 @@ def tableWidgetToDF(dict_in):
     dict_out = pd.DataFrame(dict)
     return dict_out
 
+
+def addBlock(region, block: str, position: list):
+    global number_of_blocks
+    x, y, z = position
+    region.set_block(anvil.Block('minecraft', str(block)), x, y, z)
+    number_of_blocks += 1
+
+
+def addFeature(region, position,
+               features_dict, Features, Features_heights
+               ):
+    x, y, z = position
+    if str(features_dict[Features.iloc[x, z]]).lower() not in ['0', 'none']:
+        logger.debug('Feature at position ({}, {}): {}'
+                     .format(x, z, features_dict[Features.iloc[x, z]]))
+    if features_dict[Features.iloc[x, z]] is not None:
+        if str(features_dict[Features.iloc[x, z]]).lower() \
+           not in ('0', 'none'):
+            feature_block_name = features_dict[Features.iloc[x, z]]
+            for h in range(Features_heights.iloc[x, z]):
+                yObj = y + 1 + h
+                pos = [x, yObj, z]
+                addBlock(region, feature_block_name, pos)
+
+
+def checkSquareHeights(x, z, Data, x_len, z_len, z_dir='d', x_dir='r'):
+    if z_dir == 'u':
+        z_list = [z-1, z-1, z]
+    else:
+        z_list = [z+1, z+1, z]
+
+    if x_dir == 'l':
+        x_list = [x-1, x-1, x]
+    else:
+        x_list = [x+1, x+1, x]
+
+    lists = zip(x_list, z_list)
+
+    less_than_length = max(x_list) < x_len and max(z_list) < z_len
+
+    all_within_region = max(x_list, z_list) % 512 != 0
+
+    if less_than_length and all_within_region:
+        sq_list = []
+        for x, z in lists:
+            sq_list.append(Data.iloc[x, z] == Data.iloc[x, z])
+        sq = all(sq_list)
+    else:
+        sq = False
+    return sq
+
+
+def addLargeTree(region, x, y, z, Data, x_len, z_len, tree):
+    if checkSquareHeights(x, z, Data, x_len, z_len):
+        for x, z in zip([x, x, x+1, x+1], [z, z+1, z, z+1]):
+            pos = [z, y+1, z]
+            addBlock(region, str(tree+'_sapling'), pos)
+
+    elif checkSquareHeights(x, z, Data, x_len, z_len, x_dir='l'):
+        for x, z in zip([x, x, x-1, x-1], [z, z+1, z, z+1]):
+            pos = [z, y+1, z]
+            addBlock(region, str(tree+'_sapling'), pos)
+
+    elif checkSquareHeights(x, z, Data, x_len, z_len,
+                            z_dir='u', x_dir='l'):
+        for x, z in zip([x, x, x-1, x-1], [z, z-1, z, z-1]):
+            pos = [z, y+1, z]
+            addBlock(region, str(tree+'_sapling'), pos)
+
+    elif checkSquareHeights(x, z, Data, x_len, z_len, z_dir='u'):
+        for x, z in zip([x, x, x+1, x+1], [z, z-1, z, z-1]):
+            pos = [z, y+1, z]
+            addBlock(region, str(tree+'_sapling'), pos)
+
+    elif tree == 'dark_oak':
+        pos = [z, y+1, z]
+        addBlock(region, str('oak_sapling'), pos)
+    else:
+        addBlock(region, str(tree+'_sapling'), pos)
+
+
 def addForest(region, position, Forest_period_raster,
               x_len, z_len, Data, top_block_name):
     global settings
@@ -753,6 +834,20 @@ def addForest(region, position, Forest_period_raster,
             else:
                 pos = [x, y+1, z]
                 addBlock(region, str(tree+'_sapling'), pos)
+
+
+def autoScale(data):
+    global settings
+    demHeight = max(data.max()) - min(data.min())
+    auto_scaleV = demHeight/253
+    settings['scale_v'] = max(auto_scaleV, settings['scale_v'])
+    settings['baseline_height'] =\
+        np.floor(1-min(data.min())/settings['scale_v'] + 1)
+    logger.info('Vertical Scale: {}, Baseline Height: {}'
+                .format(settings['scale_v'], settings['baseline_height'])
+                )
+
+
 def execute():
     global gui
     global settings
@@ -906,13 +1001,9 @@ def execute():
     def vert_scale(number,scale=scale_v):
         return number/scale
 
-    if auto_scale:
+    if settings['auto_scale']:
         logger.info('Autoscaling')
-        demHeight = max(data.max()) - min(data.min())
-        auto_scaleV = demHeight/254
-        scale_v = max(auto_scaleV,scale_v)
-        baseline_height = np.floor(1-min(data.min())/scale_v)
-        logger.info('Vertical Scale: {}, Baseline Height: {}'.format(scale_v,baseline_height))
+        autoScale(data)
 
     if scale_v != 1:
         data_v_scaled = data.applymap(vert_scale)
@@ -1016,97 +1107,45 @@ def execute():
                         logger.debug('Current Rows: {} to {} of {}, Column: {} of {}, Blocks before now: {}, Region: {}, {}, Time: {}'.format(z,min(z+511,z_len),z_len,x,x_len,number_of_blocks,x_region,z_region,time.perf_counter()-start))
                     if Data.iloc[x,z] == -9999:
                         pass
-                    elif Data.iloc[x,z] <= water_level:
-                        region.set_block(bedrock, x, 0, z)
-                        number_of_blocks += 1
-                        for y in range(1,water_height):
-                            region.set_block(water, x, y, z)
-                            number_of_blocks += 1
-                    elif Data.iloc[x,z]%1 == 0 or use_half_blocks == False:
+                    elif Data.iloc[x, z] <= settings['water_level']:
+                        pos = [x, 0, z]
+                        addBlock(region, 'bedrock', pos)
+                        for y in range(1, water_height):
+                            pos = [x, y, z]
+                            addBlock(region, 'water', pos)
+                    elif not settings['use_half_blocks']\
+                     or Data.iloc[x, z] % 1 == 0:
                         for y in range(y_range):
+                            pos = [x, y, z]
                             if y == 0:
-                                region.set_block(bedrock, x, y, z)
-                                number_of_blocks += 1
+                                addBlock(region, 'bedrock', pos)
                             elif y != y_range - 1:
-                                region.set_block(block, x, y, z)
-                                number_of_blocks += 1
+                                addBlock(region, settings['block_name'], pos)
                             else:
-                                region.set_block(top_block, x, y, z)
-                                number_of_blocks += 1
-                                if random.randrange(forest_freq) == 0 and use_forest and top_block_name in ['dirt','grass_block','podzol'] and y < 254:
-                                    tree = random.choice(tree_types)
-                                    if (tree == 'dark_oak' or ((tree == 'jungle' or tree == 'spruce') and random.randrange(large_trees_freq) == 0 and use_large_trees)) and (x not in (0,511) and z not in (0,511)):
-                                        if x+1 < x_len and z+1 < z_len:
-                                            sq_rd = (Data.iloc[x+1,z] and Data.iloc[x,z+1] and Data.iloc[x+1,z+1]) == Data.iloc[x,z]
-                                        else:
-                                            sq_rd = False
-                                        if x+1 < x_len:
-                                            sq_ru = (Data.iloc[x+1,z] and Data.iloc[x,z-1] and Data.iloc[x+1,z-1]) == Data.iloc[x,z]
-                                        else:
-                                            sq_ru = False
-                                        if z+1 < z_len:
-                                            sq_ld = (Data.iloc[x-1,z] and Data.iloc[x,z+1] and Data.iloc[x-1,z+1]) == Data.iloc[x,z]
-                                        else:
-                                            sq_ld = False
-
-                                        sq_lu = (Data.iloc[x-1,z] and Data.iloc[x,z-1] and Data.iloc[x-1,z-1]) == Data.iloc[x,z]
-
-
-                                        if sq_rd:
-                                            for x,z in zip([x,x,x+1,x+1],[z,z+1,z,z+1]):
-                                                region.set_block(anvil.Block('minecraft',str(tree+'_sapling')),x,y+1,z)
-                                                number_of_blocks += 1
-                                                #logger.info(tree+' large')
-                                        elif sq_ld:
-                                            for x,z in zip([x,x,x-1,x-1],[z,z+1,z,z+1]):
-                                                region.set_block(anvil.Block('minecraft',str(tree+'_sapling')),x,y+1,z)
-                                                number_of_blocks += 1
-                                                #logger.info(tree+' large')
-                                        elif sq_lu:
-                                            for x,z in zip([x,x,x-1,x-1],[z,z-1,z,z-1]):
-                                                region.set_block(anvil.Block('minecraft',str(tree+'_sapling')),x,y+1,z)
-                                                number_of_blocks += 1
-                                                #logger.info(tree+' large')
-                                        elif sq_ru:
-                                            for x,z in zip([x,x,x+1,x+1],[z,z-1,z,z-1]):
-                                                region.set_block(anvil.Block('minecraft',str(tree+'_sapling')),x,y+1,z)
-                                                number_of_blocks += 1
-                                                #logger.info(tree+' large')
-                                        elif tree == 'dark_oak':
-                                            region.set_block(anvil.Block('minecraft',str('oak_sapling')),x,y+1,z)
-                                            number_of_blocks += 1
-                                            #logger.info('dark oak failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
-                                        else:
-                                            region.set_block(anvil.Block('minecraft',str(tree+'_sapling')),x,y+1,z)
-                                            number_of_blocks += 1
-                                            #logger.info('large tree failed: {} {} {} {}'.format(y,Data.iloc[x+1,z],Data.iloc[x,z+1],Data.iloc[x+1,z+1]))
-                                    else:
-                                        region.set_block(anvil.Block('minecraft',str(tree+'_sapling')),x,y+1,z)
-                                        number_of_blocks += 1
-                                        #logger.info(tree)
-                                if use_features and features_dict[Features.iloc[x,z]] is not None:
-                                    if str(features_dict[Features.iloc[x,z]]).lower() not in ('0','none'):
-                                        feature_bool = True
-                                        feature_block = anvil.Block(features_dict[Features.iloc[x,z]])
-                                        for h in range(Features_heights.iloc[x,z]):
-                                            yObj = y + 1 + h
-                                            region.set_block(feature_block,x,yObj,z)
-                                            number_of_blocks += 1
+                                pos = [x, y, z]
+                                addBlock(region, top_block_name, pos)
+                                if settings['use_forest']:
+                                    addForest(region, pos,
+                                              Forest_period_raster, x_len,
+                                              z_len, Data, top_block_name
+                                              )
+                                if use_features:
+                                    addFeature(region, pos,
+                                               features_dict, Features,
+                                               Features_heights
+                                               )
                     else:
                         for y in range(y_range):
+                            pos = [x, y, z]
                             if y == 0:
-                                region.set_block(bedrock, x, y, z)
-                                number_of_blocks += 1
+                                addBlock(region, 'bedrock', pos)
                             elif y != y_range - 1:
-                                region.set_block(block, x, y, z)
-                                number_of_blocks += 1
+                                addBlock(region, settings['block_name'], pos)
                             else:
-                                region.set_block(block, x, y, z)
-                                number_of_blocks += 1
-                                region.set_block(half_block, x, y_range, z)
-                                number_of_blocks += 1
-            #Previous code for completing the region to avoid having large gaps at the edges.
-            #if x_region == x_regions - 1 or z_region == z_regions - 1:
+                                pos = [x, y_range, z]
+                                addBlock(region,
+                                         settings['half_block_name'], pos
+                                         )
             #    if x_len%512 != 0:
             #        for x in range(x_len,x_regions*512):
             #            for z in range((z_region)*512,(z_region+1)*512):
