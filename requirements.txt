@@ -1,0 +1,11 @@
+anvil-parser==0.6.4
+frozendict==1.2
+GDAL @ file:///C:/Users/Toby/Downloads/GDAL-3.0.4-cp38-cp38-win_amd64.whl
+NBT==1.5.0
+numpy==1.18.5
+pandas==1.0.4
+PySide2==5.15.0
+python-dateutil==2.8.1
+pytz==2020.1
+shiboken2==5.15.0
+six==1.15.0
