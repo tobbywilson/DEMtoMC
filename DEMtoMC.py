@@ -41,10 +41,15 @@ import argparse
 arg_parser = argparse.ArgumentParser(description='Generate a minecraft world from GeoData.')
 arg_parser.add_argument('--nogui',help = 'run without the GUI',action='store_false')
 arg_parser.add_argument('--config',help = 'select the config section. Default:DEFAULT',default='DEFAULT')
+arg_parser.add_argument('--debug',
+                        help='Run in debug mode',
+                        action='store_true'
+                        )
 args = arg_parser.parse_args()
 
 config_settings_section = vars(args)['config']
 gui = vars(args)['nogui']
+term_debug = vars(args)['debug']
 
 config = configparser.ConfigParser()
 
