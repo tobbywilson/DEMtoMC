@@ -79,6 +79,8 @@ def loadFromConfig(section):
     settings['use_large_trees'] = config[section]['use_large_trees'].lower() in ['true','yes','1','y','t']
     settings['large_trees_freq'] = int(config[section]['large_trees_freq'])
     settings['debug_mode'] = config[section]['debug_mode'].lower() in ['true','yes','1','y','t']
+    settings['forest_period'] = int(config[section]['forest_period'])
+    settings['tree_types'] = config[section]['tree_types'].split(', ')
     return settings
 
 
@@ -222,6 +224,8 @@ class win(QtWidgets.QWidget):
         self.open_classifier_label = QtWidgets.QLabel('Choose a classifier raster. [optional]')
         self.open_features_label = QtWidgets.QLabel('Choose a features raster. [optional]')
         self.open_features_heights_label = QtWidgets.QLabel('Choose a feature heights raster. [optional]')
+        self.open_forest_raster_label = \
+            QtWidgets.QLabel('Choose a forest density raster. [optional]')
 
         global scale_h_in
         scale_h_in = QtWidgets.QSpinBox()
@@ -340,6 +344,8 @@ class win(QtWidgets.QWidget):
         self.open_features_heights = QtWidgets.QPushButton('Open Feature Heights Raster')
         self.open_features_dict = QtWidgets.QPushButton('Load Features Dictionary from File')
         self.save_features_dict = QtWidgets.QPushButton('Save Features Dictionary to File')
+        self.open_forest_raster = \
+            QtWidgets.QPushButton('Open Forest Period Raster')
         self.debug_check_label = QtWidgets.QLabel('Run in debug mode:')
         self.debug_check = QtWidgets.QCheckBox()
         self.save_config = QtWidgets.QPushButton('Save Settings')
@@ -398,6 +404,8 @@ class win(QtWidgets.QWidget):
         self.forest_layout.addWidget(large_trees_freq_in,1,3)
         self.forest_layout.addWidget(tree_types_label,2,0)
         self.forest_layout.addWidget(tree_types_in,3,0,1,4)
+        self.forest_layout.addWidget(self.open_forest_raster_label, 4, 0, 2, 1)
+        self.forest_layout.addWidget(self.open_forest_raster, 4, 3, 2, 1)
 
         self.use_forest_box.setLayout(self.forest_layout)
         self.settings_layout.addWidget(self.use_forest_box,5,0,1,4)
@@ -661,6 +669,12 @@ class win(QtWidgets.QWidget):
             self.rasterSelected = True
             self.open_features_heights_label.setText('Feature Heights Raster: {}'.format(settings['features_heights_file']))
             logger.info('Feature Heights Raster: {}'.format(settings['features_heights_file']))
+            self.open_forest_raster_label.setText(
+                'Forest Raster: {}'.format(settings['forest_period_file'])
+                )
+            logger.info('Forest Raster: {}'
+                        .format(settings['forest_period_file'])
+                        )
 
     def openFeaturesDictFileDialog(self):
         global settings
@@ -712,6 +726,33 @@ def tableWidgetToDF(dict_in):
     dict_out = pd.DataFrame(dict)
     return dict_out
 
+def addForest(region, position, Forest_period_raster,
+              x_len, z_len, Data, top_block_name):
+    global settings
+    x, y, z = position
+    add_tree = False
+    if settings['forest_period_file'] != '':
+        if Forest_period_raster.iloc[x, z] > 0:
+            forest_period_block = Forest_period_raster.iloc[x, z]
+            surface_check = top_block_name in tree_surfaces
+            add_tree = surface_check
+    elif settings['use_forest']:
+        surface_check = top_block_name in tree_surfaces
+        add_tree = surface_check
+        forest_period_block = settings['forest_period']
+
+    if add_tree:
+        random_choice = random.random() < 1/forest_period_block
+        large_tree_random = random.random() < 1/settings['large_trees_period']
+        height_check = y < 254
+        if random_choice and surface_check and height_check:
+            tree = random.choice(settings['tree_types'])
+            if (tree == 'dark_oak' or ((tree == 'jungle' or tree == 'spruce')
+               and large_tree_random and settings['use_large_trees'])):
+                addLargeTree(region, x, y, z, Data, x_len, z_len, tree)
+            else:
+                pos = [x, y+1, z]
+                addBlock(region, str(tree+'_sapling'), pos)
 def execute():
     global gui
     global settings
@@ -827,6 +868,10 @@ def execute():
     if features_heights_file != '':
         features_heights_in = gdal.Open(features_heights_file)
         features_heights = np.rot90(np.flip(features_heights_in.ReadAsArray(),1))
+    if settings['forest_period_file'] != '':
+        forest_period_file_in = gdal.Open(settings['forest_period_file'])
+        forest_period_raster = np.rot90(
+            np.flip(forest_period_file_in.ReadAsArray(), 1))
 
     del dem_in
 
