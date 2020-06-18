@@ -886,18 +886,21 @@ def addFeature(region, position,
     if str(features_dict[Features.iloc[x, z]]).lower() not in ['0', 'none']:
         logger.debug('Feature at position ({}, {}): {}'
                      .format(x, z, features_dict[Features.iloc[x, z]]))
-    if features_dict[Features.iloc[x, z]] is not None:
+        feature_block_name = features_dict[Features.iloc[x, z]]
         if str(features_dict[Features.iloc[x, z]]).lower() \
            not in ('0', 'none'):
             if Features_heights.iloc[x, z] % 1 == 0:
-                feature_block_name = features_dict[Features.iloc[x, z]]
                 for h in range(Features_heights.iloc[x, z]):
                     yObj = y + 1 + h
                     pos = [x, yObj, z]
                     addBlock(region, feature_block_name, pos)
+            elif feature_block_name in all_half_blocks:
+                for h in np.arange(0, Features_heights.iloc[x, z], 0.5):
+                    yObj = y + 0.5 + h
+                    pos = [x, yObj, z]
+                    addBlock(region, feature_block_name, pos)
             else:
-                feature_block_name = features_dict[Features.iloc[x, z]]
-                for h in range(0, Features_heights.iloc[x, z], 0.5):
+                for h in range(Features_heights.iloc[x, z]):
                     yObj = y + 1 + h
                     pos = [x, yObj, z]
                     addBlock(region, feature_block_name, pos)
