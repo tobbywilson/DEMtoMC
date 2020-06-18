@@ -889,11 +889,18 @@ def addFeature(region, position,
     if features_dict[Features.iloc[x, z]] is not None:
         if str(features_dict[Features.iloc[x, z]]).lower() \
            not in ('0', 'none'):
-            feature_block_name = features_dict[Features.iloc[x, z]]
-            for h in range(Features_heights.iloc[x, z]):
-                yObj = y + 1 + h
-                pos = [x, yObj, z]
-                addBlock(region, feature_block_name, pos)
+            if Features_heights.iloc[x, z] % 1 == 0:
+                feature_block_name = features_dict[Features.iloc[x, z]]
+                for h in range(Features_heights.iloc[x, z]):
+                    yObj = y + 1 + h
+                    pos = [x, yObj, z]
+                    addBlock(region, feature_block_name, pos)
+            else:
+                feature_block_name = features_dict[Features.iloc[x, z]]
+                for h in range(0, Features_heights.iloc[x, z], 0.5):
+                    yObj = y + 1 + h
+                    pos = [x, yObj, z]
+                    addBlock(region, feature_block_name, pos)
 
 
 def checkSquareHeights(x, z, Data, x_len, z_len, z_dir='d', x_dir='r'):
@@ -1127,8 +1134,8 @@ def execute():
         Features = pd.DataFrame(h_scale(features, settings['scale_h']))
 
     if settings['features_heights_file'] != '':
-        Features_heights = pd.DataFrame(h_scale(features_heights,
-                                                settings['scale_h']))
+        features_heights_unrounded = pd.DataFrame(h_scale(features_heights,
+                                                  settings['scale_h']))
 
     if settings['forest_period_file'] != '':
         Forest_period_raster = pd.DataFrame(h_scale(forest_period_raster,
@@ -1155,6 +1162,7 @@ def execute():
     del data
 
     Data = data_v_scaled.applymap(flex_round)
+    Features_heights = features_heights_unrounded.applymap(flex_round)
 
     del data_v_scaled
 
