@@ -106,9 +106,33 @@ def saveToConfig(section, settings):
 
 if os.path.isfile('DEMtoMC.ini'):
     settings = loadFromConfig(config_settings_section)
-    config_file_bool = True
 else:
-    config_file_bool = False
+    default_ini_setup = {}
+    default_ini_setup['file'] = ''
+    default_ini_setup['directory'] = ''
+    default_ini_setup['classifier_file'] = ''
+    default_ini_setup['features_file'] = ''
+    default_ini_setup['features_heights_file'] = ''
+    default_ini_setup['forest_period_file'] = ''
+    default_ini_setup['classifier_dict_file'] = ''
+    default_ini_setup['features_dict_file'] = ''
+    default_ini_setup['water_level'] = '0.0'
+    default_ini_setup['baseline_height'] = '5'
+    default_ini_setup['scale_h'] = '1'
+    default_ini_setup['scale_v'] = '1.0'
+    default_ini_setup['auto_scale'] = 'True'
+    default_ini_setup['block_name'] = ''
+    default_ini_setup['top_block_name'] = ''
+    default_ini_setup['half_block_name'] = ''
+    default_ini_setup['use_half_blocks'] = ''
+    default_ini_setup['use_forest'] = 'True'
+    default_ini_setup['forest_period'] = '50'
+    default_ini_setup['tree_types'] = ''
+    default_ini_setup['use_large_trees'] = 'False'
+    default_ini_setup['large_trees_period'] = '25'
+    default_ini_setup['debug_mode'] = 'False'
+    settings = default_ini_setup
+    saveToConfig('DEFAULT', default_ini_setup)
 
 
 def flex_round(number):
@@ -244,8 +268,7 @@ class win(QtWidgets.QWidget):
         scale_h_label.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter
             )
-        scale_h_in.setValue(1)
-        scale_h_in.setMinimum(1)
+        scale_h_in.setRange(1, 9999)
         scale_h_in.setPrefix('1:')
 
         global scale_v_in
@@ -254,7 +277,6 @@ class win(QtWidgets.QWidget):
         scale_v_label.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter
             )
-        scale_v_in.setValue(1)
         scale_v_in.setRange(-1024, 1024)
         scale_v_in.setStepType(
             QtWidgets.QAbstractSpinBox.AdaptiveDecimalStepType
@@ -274,7 +296,6 @@ class win(QtWidgets.QWidget):
         water_label.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter
             )
-        water_level_in.setValue(1)
         water_level_in.setRange(-10000, 10000)
         water_level_in.setStepType(
             QtWidgets.QAbstractSpinBox.AdaptiveDecimalStepType
@@ -286,7 +307,6 @@ class win(QtWidgets.QWidget):
         baseline_height_label.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter
             )
-        baseline_height_in.setValue(5)
         baseline_height_in.setRange(-9000, 256)
 
         global block_in
@@ -336,8 +356,7 @@ class win(QtWidgets.QWidget):
         forest_period_label.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter
             )
-        forest_period_in.setValue(25)
-        forest_period_in.setMinimum(4)
+        forest_period_in.setRange(4, 9999)
         forest_period_in.setPrefix('1/')
 
         global tree_types_in
@@ -360,7 +379,6 @@ class win(QtWidgets.QWidget):
         large_trees_period_label.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter
             )
-        large_trees_period_in.setValue(25)
         large_trees_period_in.setMinimum(1)
         large_trees_period_in.setPrefix('1/')
 
@@ -509,9 +527,8 @@ class win(QtWidgets.QWidget):
         features_dict_in.cellChanged.connect(self.addRow)
         classifier_dict_in.cellChanged.connect(self.addRow)
 
-        if config_file_bool:
-            global config_settings_section
-            self.setFromConfig(config_settings_section)
+        global config_settings_section
+        self.setFromConfig(config_settings_section)
 
     def executeFromGui(self):
         self.run.setEnabled(False)
