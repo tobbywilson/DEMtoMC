@@ -130,4 +130,5 @@ dmypy.json
 *.ini
 
 !DEMtoMC.ini
+!Examples/*/*.mca
 test.py
