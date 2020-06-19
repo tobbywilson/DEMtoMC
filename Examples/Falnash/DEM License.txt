@@ -1,0 +1,1 @@
+The DEM data used to generate this example is copyright © Department Finance, Services and Innovation, released under the Creative Commons Attribution 3.0 License. Original data canbe obtained through the ELVIS portal (https://elevation.fsdf.org.au/).
