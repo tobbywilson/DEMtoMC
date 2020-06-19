@@ -130,5 +130,5 @@ dmypy.json
 *.ini
 
 !DEMtoMC.ini
-!Examples/Falnash/*.mca
+!Examples/*/*.mca
 test.py
