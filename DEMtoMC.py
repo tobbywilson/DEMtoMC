@@ -907,7 +907,7 @@ def addFeature(region, position,
         if str(features_dict[Features.iloc[x, z]]).lower() \
            not in ('0', 'none'):
             if Features_heights.iloc[x, z] % 1 == 0:
-                for h in range(Features_heights.iloc[x, z]):
+                for h in np.arange(0,Features_heights.iloc[x, z],1):
                     yObj = y + 1 + h
                     pos = [x, yObj, z]
                     addBlock(region, feature_block_name, pos)
@@ -917,7 +917,7 @@ def addFeature(region, position,
                     pos = [x, yObj, z]
                     addBlock(region, feature_block_name, pos)
             else:
-                for h in range(Features_heights.iloc[x, z]):
+                for h in np.arange(0,Features_heights.iloc[x, z],1):
                     yObj = y + 1 + h
                     pos = [x, yObj, z]
                     addBlock(region, feature_block_name, pos)
