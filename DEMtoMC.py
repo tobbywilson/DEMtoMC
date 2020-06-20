@@ -1024,6 +1024,22 @@ def autoScale(data):
                 )
 
 
+def vert_scale(number, scale=settings['scale_v']):
+    return number/scale
+
+def h_scale(data, scale):
+    data_lists = []
+    if scale != 1:
+        for n in range(int(len(data[:, 0])/scale)):
+            row = []
+            for m in range(int(len(data[0, :])/scale)):
+                row.append(data[n * scale:n * scale + scale,
+                                m * scale:m * scale + scale].max())
+            data_lists.append(row)
+    else:
+        data_lists = data
+    return data_lists
+
 def execute():
     global gui
     global settings
@@ -1136,19 +1152,6 @@ def execute():
 
     logger.info('Scaling Horizontally')
 
-    def h_scale(data, scale):
-        data_lists = []
-        if scale != 1:
-            for n in range(int(len(data[:, 0])/scale)):
-                row = []
-                for m in range(int(len(data[0, :])/scale)):
-                    row.append(data[n * scale:n * scale + scale,
-                                    m * scale:m * scale + scale].max())
-                data_lists.append(row)
-        else:
-            data_lists = data
-        return data_lists
-
     data = pd.DataFrame(h_scale(dem, settings['scale_h']))
 
     if settings['classifier_file'] != '':
@@ -1168,9 +1171,6 @@ def execute():
     logger.info('Scaling Vertically')
 
     del dem
-
-    def vert_scale(number, scale=settings['scale_v']):
-        return number/scale
 
     if settings['auto_scale']:
         logger.info('Autoscaling')
