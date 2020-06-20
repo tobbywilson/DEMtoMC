@@ -942,7 +942,7 @@ def checkSquareHeights(x, z, Data, x_len, z_len, z_dir='d', x_dir='r'):
 
     less_than_length = max(x_list) < x_len and max(z_list) < z_len
 
-    all_within_region = max(x_list, z_list) % 512 != 0
+    all_within_region = max(*x_list, *z_list) % 512 != 0
 
     if less_than_length and all_within_region:
         sq_list = []
