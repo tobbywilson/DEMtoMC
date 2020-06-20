@@ -140,11 +140,11 @@ else:
     settings = default_ini_setup
     saveToConfig('DEFAULT', default_ini_setup)
 
-
+# Used to ensure height rasters have appropriate quantisation
 def flex_round(number):
     return round(number*(2))/(2)
 
-
+# defines blocks to initialise block comboboxes
 blockList = [
     'stone',
     'grass_block',
@@ -163,11 +163,14 @@ blockList = [
     'water'
 ]
 
+# definesblocks on which trees will grow
 tree_surfaces = ['dirt', 'grass_block', 'podzol']
 
+# imports known minecraft blocks
 all_blocks_df = pd.read_csv('.\\minecraft.blocks.blocks')
 all_blocks = list(all_blocks_df['block'])
 
+# defines half blocks to intialise combobox
 half_blockList = [
     'stone_slab',
     'oak_slab',
@@ -175,9 +178,11 @@ half_blockList = [
     'brick_slab',
 ]
 
+# import known half blocks
 all_half_blocks_df = pd.read_csv('.\\minecraft.half_blocks.blocks')
 all_half_blocks = list(all_half_blocks_df['block'])
 
+# defines known trees
 tree_list_df = pd.read_csv('.\\minecraft.trees.blocks')
 tree_list = list(tree_list_df['block'])
 
@@ -926,6 +931,7 @@ def addFeature(region, position,
                     pos = [x, yObj, z]
                     addBlock(region, feature_block_name, pos)
 
+
 def checkSquareHeights(x, z, Data, x_len, z_len, z_dir='d', x_dir='r'):
     if z_dir == 'u':
         z_list = [z-1, z-1, z]
@@ -1026,6 +1032,7 @@ def autoScale(data):
 def vert_scale(number, scale=settings['scale_v']):
     return number/scale
 
+
 def h_scale(data, scale):
     data_lists = []
     if scale != 1:
@@ -1038,6 +1045,7 @@ def h_scale(data, scale):
     else:
         data_lists = data
     return data_lists
+
 
 def execute():
     global gui
