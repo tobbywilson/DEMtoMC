@@ -1190,7 +1190,9 @@ def execute():
     del data
 
     Data = data_v_scaled.applymap(flex_round)
-    Features_heights = features_heights_unrounded.applymap(flex_round)
+
+    if settings['features_heights_file'] != '':
+        Features_heights = features_heights_unrounded.applymap(flex_round)
 
     del data_v_scaled
 
