@@ -34,6 +34,9 @@ import time
 import configparser
 import argparse
 
+# Threading Support
+import threading
+
 # Geoprocessing
 from osgeo import gdal
 gdal.AllRegister()
@@ -531,8 +534,9 @@ class win(QtWidgets.QWidget):
         self.setFromConfig(config_settings_section)
 
     def executeFromGui(self):
+        thread_run = threading.Thread(target=execute)
         self.run.setEnabled(False)
-        execute()
+        thread_run.start()
         self.run.setEnabled(True)
 
     def setFromConfig(self, section):
