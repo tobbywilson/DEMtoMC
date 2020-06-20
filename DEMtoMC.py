@@ -19,7 +19,7 @@ import logging.handlers
 import os
 
 # GUI
-from PySide2 import QtCore, QtWidgets
+from PySide2 import QtCore, QtWidgets, QtGui
 
 # Minecraft world editing
 import anvil
@@ -40,6 +40,8 @@ import threading
 # Geoprocessing
 from osgeo import gdal
 gdal.AllRegister()
+
+start_up_start = time.perf_counter()
 
 arg_parser = argparse.ArgumentParser(
                         description='Generate a minecraft world from GeoData.'
@@ -62,9 +64,6 @@ args = arg_parser.parse_args()
 config_settings_section = vars(args)['config']
 gui = vars(args)['nogui']
 term_debug = vars(args)['debug']
-
-if gui:
-    start_up_start = time.perf_counter()
 
 config = configparser.ConfigParser()
 
@@ -222,14 +221,14 @@ class win(QtWidgets.QWidget):
         self.threadpool = QtCore.QThreadPool()
 
         self.setWindowTitle('DEMtoMC')
-        self.setGeometry(300, 200, 500, 300)
+        self.setWindowIcon(QtGui.QIcon('./DEMtoMC.png'))
 
         self.createGridLayout()
         vbox = QtWidgets.QVBoxLayout()
         vbox.addWidget(self.io_box)
         vbox.addWidget(self.settings_box)
         vbox.addWidget(self.button_box)
-        # vbox.addWidget(self.logBox)
+        vbox.addWidget(self.logBox)
         self.setLayout(vbox)
 
     def createGridLayout(self):
@@ -237,9 +236,10 @@ class win(QtWidgets.QWidget):
         self.settings_box = QtWidgets.QGroupBox('Settings')
         self.io_box = QtWidgets.QGroupBox('Input/Output')
         self.use_forest_box = QtWidgets.QGroupBox('Forest')
+        self.trees_box = QtWidgets.QGroupBox('Tree Type(s)')
         self.classifier_box = QtWidgets.QGroupBox('Classifier Dictionary')
         self.features_box = QtWidgets.QGroupBox('Features Dictionary')
-        # self.logBox = QtWidgets.QGroupBox('Execution Log')
+        self.logBox = QtWidgets.QGroupBox('Execution Log')
 
         self.button_layout = QtWidgets.QHBoxLayout()
         self.settings_layout = QtWidgets.QGridLayout()
@@ -250,14 +250,17 @@ class win(QtWidgets.QWidget):
         self.features_in_layout = QtWidgets.QHBoxLayout()
         self.features_heights_in_layout = QtWidgets.QHBoxLayout()
         self.forest_layout = QtWidgets.QGridLayout()
+        self.forest_outer_layout = QtWidgets.QGridLayout()
+        self.trees_layout = QtWidgets.QVBoxLayout()
         self.classifier_layout = QtWidgets.QGridLayout()
         self.features_layout = QtWidgets.QGridLayout()
-        # self.logLayout = QtWidgets.QVBoxLayout()
+        self.dict_layout = QtWidgets.QHBoxLayout()
+        self.logLayout = QtWidgets.QVBoxLayout()
 
-        # self.executeLog = QTextEditLogger(self)
-        # self.executeLog.setFormatter(log_format)
-        # logger.getLogger().addHandler(self.executeLog)
-        # logger.getLogger().setLevel(logging.DEBUG)
+        self.executeLog = QTextEditLogger(self)
+        #self.executeLog.setFormatter(log_format)
+        logger.addHandler(self.executeLog)
+        logger.setLevel(logging.INFO)
 
         self.file_label = QtWidgets.QLabel('Choose a DEM file.')
         self.out_label = QtWidgets.QLabel('Choose an output directory.')
@@ -360,7 +363,7 @@ class win(QtWidgets.QWidget):
 
         global forest_period_in
         forest_period_in = QtWidgets.QSpinBox()
-        forest_period_label = QtWidgets.QLabel('Forest Frequency:')
+        forest_period_label = QtWidgets.QLabel('Forest Period:')
         forest_period_label.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter
             )
@@ -369,8 +372,6 @@ class win(QtWidgets.QWidget):
 
         global tree_types_in
         tree_types_in = QtWidgets.QListWidget()
-        tree_types_label = QtWidgets.QLabel('Tree Type(s)')
-        tree_types_label.setAlignment(QtCore.Qt.AlignVCenter)
         tree_types_in.addItems(tree_list)
         tree_types_in.setSelectionMode(QtWidgets.QListWidget.MultiSelection)
 
@@ -383,7 +384,7 @@ class win(QtWidgets.QWidget):
 
         global large_trees_period_in
         large_trees_period_in = QtWidgets.QSpinBox()
-        large_trees_period_label = QtWidgets.QLabel('Large Trees Frequency:')
+        large_trees_period_label = QtWidgets.QLabel('Large Trees Period:')
         large_trees_period_label.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter
             )
@@ -467,18 +468,20 @@ class win(QtWidgets.QWidget):
 
         self.forest_layout.addWidget(use_forestCheck_label, 0, 0)
         self.forest_layout.addWidget(use_forestCheck_in, 0, 1)
-        self.forest_layout.addWidget(forest_period_label, 0, 2)
-        self.forest_layout.addWidget(forest_period_in, 0, 3)
-        self.forest_layout.addWidget(use_large_trees_label, 1, 0)
-        self.forest_layout.addWidget(use_large_trees_in, 1, 1)
-        self.forest_layout.addWidget(large_trees_period_label, 1, 2)
-        self.forest_layout.addWidget(large_trees_period_in, 1, 3)
-        self.forest_layout.addWidget(tree_types_label, 2, 0)
-        self.forest_layout.addWidget(tree_types_in, 3, 0, 1, 4)
-        self.forest_layout.addWidget(self.open_forest_raster_label, 4, 0, 2, 1)
-        self.forest_layout.addWidget(self.open_forest_raster, 4, 3, 2, 1)
+        self.forest_layout.addWidget(forest_period_label, 1, 0)
+        self.forest_layout.addWidget(forest_period_in, 1, 1)
+        self.forest_layout.addWidget(use_large_trees_label, 2, 0)
+        self.forest_layout.addWidget(use_large_trees_in, 2, 1)
+        self.forest_layout.addWidget(large_trees_period_label, 3, 0)
+        self.forest_layout.addWidget(large_trees_period_in, 3, 1)
+        self.trees_layout.addWidget(tree_types_in)
+        self.forest_outer_layout.addLayout(self.forest_layout, 0, 0)
+        self.forest_outer_layout.addWidget(self.trees_box, 0, 1)
+        self.forest_outer_layout.addWidget(self.open_forest_raster_label, 1, 0)
+        self.forest_outer_layout.addWidget(self.open_forest_raster, 1, 1)
 
-        self.use_forest_box.setLayout(self.forest_layout)
+        self.trees_box.setLayout(self.trees_layout)
+        self.use_forest_box.setLayout(self.forest_outer_layout)
         self.settings_layout.addWidget(self.use_forest_box, 5, 0, 1, 4)
 
         self.classifier_layout.addWidget(classifier_dict_in, 0, 0, 1, 2)
@@ -491,8 +494,9 @@ class win(QtWidgets.QWidget):
         self.features_layout.addWidget(self.save_features_dict, 1, 1)
         self.features_box.setLayout(self.features_layout)
 
-        self.settings_layout.addWidget(self.classifier_box, 6, 0, 1, 4)
-        self.settings_layout.addWidget(self.features_box, 7, 0, 1, 4)
+        self.dict_layout.addWidget(self.classifier_box)
+        self.dict_layout.addWidget(self.features_box)
+        self.settings_layout.addLayout(self.dict_layout, 6, 0, 1, 4)
 
         self.settings_box.setLayout(self.settings_layout)
 
@@ -505,8 +509,8 @@ class win(QtWidgets.QWidget):
 
         self.button_box.setLayout(self.button_layout)
 
-        # self.logLayout.addWidget(self.executeLog.logger)
-        # self.logBox.setLayout(self.logLayout)
+        self.logLayout.addWidget(self.executeLog.logger)
+        self.logBox.setLayout(self.logLayout)
 
         self.fileSelected = False
         self.directorySelected = False
@@ -962,27 +966,27 @@ def checkSquareHeights(x, z, Data, x_len, z_len, z_dir='d', x_dir='r'):
 def addLargeTree(region, x, y, z, Data, x_len, z_len, tree):
     if checkSquareHeights(x, z, Data, x_len, z_len):
         for x, z in zip([x, x, x+1, x+1], [z, z+1, z, z+1]):
-            pos = [z, y+1, z]
+            pos = [x, y+1, z]
             addBlock(region, str(tree+'_sapling'), pos)
 
     elif checkSquareHeights(x, z, Data, x_len, z_len, x_dir='l'):
         for x, z in zip([x, x, x-1, x-1], [z, z+1, z, z+1]):
-            pos = [z, y+1, z]
+            pos = [x, y+1, z]
             addBlock(region, str(tree+'_sapling'), pos)
 
     elif checkSquareHeights(x, z, Data, x_len, z_len,
                             z_dir='u', x_dir='l'):
         for x, z in zip([x, x, x-1, x-1], [z, z-1, z, z-1]):
-            pos = [z, y+1, z]
+            pos = [x, y+1, z]
             addBlock(region, str(tree+'_sapling'), pos)
 
     elif checkSquareHeights(x, z, Data, x_len, z_len, z_dir='u'):
         for x, z in zip([x, x, x+1, x+1], [z, z-1, z, z-1]):
-            pos = [z, y+1, z]
+            pos = [x, y+1, z]
             addBlock(region, str(tree+'_sapling'), pos)
 
     elif tree == 'dark_oak':
-        pos = [z, y+1, z]
+        pos = [x, y+1, z]
         addBlock(region, str('oak_sapling'), pos)
     else:
         addBlock(region, str(tree+'_sapling'), pos)
@@ -1001,7 +1005,7 @@ def addForest(region, position, x_len, z_len, Data,
     elif settings['use_forest']:
         surface_check = top_block_name in tree_surfaces
         add_tree = surface_check
-        forest_period_block = settings['forest_period']
+        forest_period_block = int(settings['forest_period'])
 
     if add_tree:
         random_choice = random.random() < 1/forest_period_block
@@ -1019,11 +1023,16 @@ def addForest(region, position, x_len, z_len, Data,
 
 def autoScale(data):
     global settings
-    demHeight = max(data.max()) - min(data.min())
+    high = max(data.max())
+    if min(data.min()) == -9999:
+        low = min(min([l for l in [[i for i in data.iloc[j] if i != -9999] for j in range(len(data))]if l]))
+    else:
+        low = min(data.min())
+    demHeight = high - low
     auto_scaleV = demHeight/253
     settings['scale_v'] = max(auto_scaleV, settings['scale_v'])
     settings['baseline_height'] =\
-        np.floor(1-min(data.min())/settings['scale_v'] + 1)
+        np.floor(1-low/settings['scale_v'] + 1)
     logger.info('Vertical Scale: {}, Baseline Height: {}'
                 .format(settings['scale_v'], settings['baseline_height'])
                 )
@@ -1092,8 +1101,8 @@ def execute():
 
     if settings['scale_v'] == 0:
         logger.warning('Vertical scale cannot be 0,'
-                       'please use a different value.'
-                       'Continuing with AutoScale.')
+                       ' please use a different value.'
+                       ' Continuing with AutoScale.')
         settings['auto_scale'] = True
 
     for block in [settings['block_name'], settings['top_block_name']]:
@@ -1112,14 +1121,14 @@ def execute():
                        .format(settings['half_block_name']))
 
     logger.info('Horizontal Scale: {}\n'
-                '\t\t\t\tVertical Scale: {}\n'
-                '\t\t\t\tWater Level: {}\n'
-                '\t\t\t\tBaseline Height: {}\n'
-                '\t\t\t\tMain Block: {}\n'
-                '\t\t\t\tTop Block: {}\n'
-                '\t\t\t\tHalf Block: {}\n'
-                '\t\t\t\tUsing Half Blocks? {}\n'
-                '\t\t\t\tOutput Directory: {}'
+                'Vertical Scale: {}\n'
+                'Water Level: {}\n'
+                'Baseline Height: {}\n'
+                'Main Block: {}\n'
+                'Top Block: {}\n'
+                'Half Block: {}\n'
+                'Using Half Blocks? {}\n'
+                'Output Directory: {}'
                 .format(settings['scale_h'], settings['scale_v'],
                         settings['water_level'], settings['baseline_height'],
                         settings['block_name'], settings['top_block_name'],
@@ -1202,11 +1211,11 @@ def execute():
     if max(Data.max())/settings['scale_v'] + settings['baseline_height'] > 255:
         over_tall = max(Data.max()) - 255
         logger.warning('Data {} blocks too tall,'
-                       'try increasing the vertical scale,'
-                       'or reducing the baseline height'
-                       '(even making it negative if necessary),'
-                       'or use the AutoScale option.'
-                       'I will truncate any too tall stacks.'
+                       ' try increasing the vertical scale,'
+                       ' or reducing the baseline height'
+                       ' (even making it negative if necessary),'
+                       ' or use the AutoScale option.'
+                       ' I will truncate any too tall stacks.'
                        .format(over_tall))
 
     if bool(settings['classifier_file']):
@@ -1278,7 +1287,7 @@ def execute():
         for z_region in range(z_regions):
             region_index += 1
             logger.info('Creating Region: {} of {} ({}, {})'
-                        .format(region_index, x_region * z_region,
+                        .format(region_index, x_regions * z_regions,
                                 x_region, z_region
                                 )
                         )
@@ -1286,7 +1295,7 @@ def execute():
             region = anvil.EmptyRegion(x_region, z_region)
 
             logger.info('Region: {} of {} ({}, {})'
-                        .format(region_index,  x_region * z_region,
+                        .format(region_index,  x_regions * z_regions,
                                 x_region, z_region
                                 )
                         )
@@ -1307,10 +1316,10 @@ def execute():
                         y_range = 255
                     if z % 512 == 0 and x % 64 == 0:
                         logger.info('Current Rows: {} to {} of {}\n'
-                                    '\t\t\t\tColumns: {} to {} of {}\n'
-                                    '\t\t\t\tBlocks before now: {}\n'
-                                    '\t\t\t\tRegion: {} of {} ({}, {})\n'
-                                    '\t\t\t\tTime: {}'
+                                    'Columns: {} to {} of {}\n'
+                                    'Blocks before now: {}\n'
+                                    'Region: {} of {} ({}, {})\n'
+                                    'Time: {}'
                                     .format(z, min(z+511, z_len), z_len, x,
                                             min(x+63, x_len), x_len,
                                             number_of_blocks, region_index,
@@ -1319,10 +1328,10 @@ def execute():
                                             time.perf_counter()-start))
                     if z % 512 == 0 and x % 64 != 0:
                         logger.debug('Current Rows: {} to {} of {}\n'
-                                     '\t\t\t\t Columns: {} of {}\n'
-                                     '\t\t\t\t Blocks before now: {}\n'
-                                     '\t\t\t\t Region: {} of {} ({}, {})\n'
-                                     '\t\t\t\t Time: {}'
+                                     'Columns: {} of {}\n'
+                                     'Blocks before now: {}\n'
+                                     'Region: {} of {} ({}, {})\n'
+                                     'Time: {}'
                                      .format(z, min(z+511, z_len), z_len, x,
                                              x_len, number_of_blocks,
                                              region_index,
@@ -1416,10 +1425,12 @@ if gui:
         app = QtWidgets.QApplication.instance()
         if app is None:
             app = QtWidgets.QApplication([])
-
+        pixmap = QtGui.QPixmap("./DEMtoMC.splash.png")
+        splash = QtWidgets.QSplashScreen(pixmap)
+        splash.show()
         widget = win()
         widget.show()
-
+        splash.finish(widget)
         start_up_finish = time.perf_counter()
         logger.info('GUI Startup time: {:.2f}'.format(start_up_finish-start_up_start))
         
