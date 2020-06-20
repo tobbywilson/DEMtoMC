@@ -1133,26 +1133,26 @@ def execute():
         logger.debug('Classifier file found')
         classifier_in = gdal.Open(settings['classifier_file'])
         classifier = np.rot90(np.flip(classifier_in.ReadAsArray(), 1))
+        del classifier_in
 
     if settings['features_file'] != '':
         features_in = gdal.Open(settings['features_file'])
         features = np.rot90(np.flip(features_in.ReadAsArray(), 1))
+        del features_in
 
     if settings['features_heights_file'] != '':
         features_heights_in = gdal.Open(settings['features_heights_file'])
         features_heights = np.rot90(
             np.flip(features_heights_in.ReadAsArray(), 1))
+        del features_heights_in
 
     if settings['forest_period_file'] != '':
         forest_period_file_in = gdal.Open(settings['forest_period_file'])
         forest_period_raster = np.rot90(
             np.flip(forest_period_file_in.ReadAsArray(), 1))
+        forest_period_file_in
 
     del dem_in
-    del classifier_in
-    del features_in
-    del features_heights_in
-    del forest_period_file_in
 
     logger.info('Scaling Horizontally')
 
