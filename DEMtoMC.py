@@ -184,11 +184,8 @@ tree_list = list(tree_list_df['block'])
 
 log_format = '%(asctime)s - %(levelname)s: %(message)s'
 
-log_to_file = logging.handlers.RotatingFileHandler('DEMtoMC.log',
-                                                   mode='a',
-                                                   maxBytes=5*1024*1024,
-                                                   backupCount=3
-                                                   )
+log_to_file = logging.FileHandler('DEMtoMC.log', mode='w')
+                                                   
 log_to_file.setLevel(logging.DEBUG)
 
 log_to_console = logging.StreamHandler(sys.stdout)
@@ -929,7 +926,6 @@ def addFeature(region, position,
                     pos = [x, yObj, z]
                     addBlock(region, feature_block_name, pos)
 
-
 def checkSquareHeights(x, z, Data, x_len, z_len, z_dir='d', x_dir='r'):
     if z_dir == 'u':
         z_list = [z-1, z-1, z]
@@ -1095,16 +1091,16 @@ def execute():
     for block in [settings['block_name'], settings['top_block_name']]:
         if block not in all_blocks:
             logger.warning('A block name used ({}), is not recognised as a'
-                           'valid block or fluid. I will try anyway,'
-                           'but may not succeed.'.format(block))
+                           ' valid block or fluid. I will try anyway,'
+                           ' but may not succeed.'.format(block))
     if settings['half_block_name'] not in all_blocks:
         logger.warning('The half block name used ({}), is not recognised as a'
-                       'valid block. I will try anyway, but may not succeed.'
+                       ' valid block. I will try anyway, but may not succeed.'
                        .format(settings['half_block_name']))
     elif settings['half_block_name'] not in all_half_blocks:
         logger.warning('The half block name used ({}), is not recognised as a'
-                       'valid half block. I will still succeed,'
-                       'but you may not achieve your desired result.'
+                       ' valid half block. I will still succeed,'
+                       ' but you may not achieve your desired result.'
                        .format(settings['half_block_name']))
 
     logger.info('Horizontal Scale: {}\n'
@@ -1167,7 +1163,6 @@ def execute():
     if settings['features_heights_file'] != '':
         features_heights_unrounded = pd.DataFrame(h_scale(features_heights,
                                                   settings['scale_h']))
-
     if settings['forest_period_file'] != '':
         Forest_period_raster = pd.DataFrame(h_scale(forest_period_raster,
                                                     settings['scale_h']))
