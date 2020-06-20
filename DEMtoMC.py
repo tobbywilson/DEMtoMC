@@ -986,8 +986,8 @@ def addLargeTree(region, x, y, z, Data, x_len, z_len, tree):
         addBlock(region, str(tree+'_sapling'), pos)
 
 
-def addForest(region, position, Forest_period_raster,
-              x_len, z_len, Data, top_block_name):
+def addForest(region, position, x_len, z_len, Data,
+              top_block_name, Forest_period_raster = '', ):
     global settings
     x, y, z = position
     add_tree = False
@@ -1343,11 +1343,12 @@ def execute():
                             else:
                                 pos = [x, y, z]
                                 addBlock(region, top_block_name, pos)
-                                if settings['use_forest']:
-                                    addForest(region, pos,
-                                              Forest_period_raster, x_len,
-                                              z_len, Data, top_block_name
+                                if settings['use_forest'] and settings['forest_period_file'] != '':
+                                    addForest(region, pos, x_len, z_len, Data, top_block_name,
+                                              Forest_period_raster = Forest_period_raster
                                               )
+                                elif settings['use_forest']:
+                                    addForest(region, pos, x_len, z_len, Data, top_block_name)
                                 if use_features:
                                     addFeature(region, pos,
                                                features_dict, Features,
