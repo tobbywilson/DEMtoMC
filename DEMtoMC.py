@@ -63,6 +63,9 @@ config_settings_section = vars(args)['config']
 gui = vars(args)['nogui']
 term_debug = vars(args)['debug']
 
+if gui:
+    start_up_start = time.perf_counter()
+
 config = configparser.ConfigParser()
 
 settings = {}
@@ -1411,6 +1414,9 @@ if gui:
         widget = win()
         widget.show()
 
+        start_up_finish = time.perf_counter()
+        logger.info('GUI Startup time: {:.2f}'.format(start_up_finish-start_up_start))
+        
         sys.exit(app.exec_())
 else:
     execute()
