@@ -139,9 +139,11 @@ else:
     settings = default_ini_setup
     saveToConfig('DEFAULT', default_ini_setup)
 
+
 # Used to ensure height rasters have appropriate quantisation
 def flex_round(number):
     return round(number*(2))/(2)
+
 
 # defines blocks to initialise block comboboxes
 blockList = [
@@ -189,7 +191,7 @@ tree_list = list(tree_list_df['block'])
 log_format = '%(asctime)s - %(levelname)s: %(message)s'
 
 log_to_file = logging.FileHandler('DEMtoMC.log', mode='w')
-                                                   
+
 log_to_file.setLevel(logging.DEBUG)
 
 log_to_console = logging.StreamHandler(sys.stdout)
@@ -258,7 +260,7 @@ class win(QtWidgets.QWidget):
         self.logLayout = QtWidgets.QVBoxLayout()
 
         self.executeLog = QTextEditLogger(self)
-        #self.executeLog.setFormatter(log_format)
+        # self.executeLog.setFormatter(log_format)
         logger.addHandler(self.executeLog)
         logger.setLevel(logging.INFO)
 
@@ -963,24 +965,34 @@ def checkSquareHeights(x, z, Data, x_len, z_len, z_dir='d', x_dir='r'):
     return sq
 
 
+def regionCheck(x, z, x1, z1):
+    for coord, coord1 in zip([x, z], [x1, z1]):
+        if coord % 512 == 0 and coord1 % 512 == 511:
+            return False
+        elif coord % 512 == 511 and coord1 % 512 == 0:
+            return False
+        else:
+            return True
+
+
 def addLargeTree(region, x, y, z, Data, x_len, z_len, tree):
-    if checkSquareHeights(x, z, Data, x_len, z_len):
+    if checkSquareHeights(x, z, Data, x_len, z_len) and regionCheck(x, z, x+1, z+1):
         for x, z in zip([x, x, x+1, x+1], [z, z+1, z, z+1]):
             pos = [x, y+1, z]
             addBlock(region, str(tree+'_sapling'), pos)
 
-    elif checkSquareHeights(x, z, Data, x_len, z_len, x_dir='l'):
+    elif checkSquareHeights(x, z, Data, x_len, z_len, x_dir='l') and regionCheck(x, z, x-1, z+1):
         for x, z in zip([x, x, x-1, x-1], [z, z+1, z, z+1]):
             pos = [x, y+1, z]
             addBlock(region, str(tree+'_sapling'), pos)
 
     elif checkSquareHeights(x, z, Data, x_len, z_len,
-                            z_dir='u', x_dir='l'):
+                            z_dir='u', x_dir='l') and regionCheck(x, z, x-1, z-1):
         for x, z in zip([x, x, x-1, x-1], [z, z-1, z, z-1]):
             pos = [x, y+1, z]
             addBlock(region, str(tree+'_sapling'), pos)
 
-    elif checkSquareHeights(x, z, Data, x_len, z_len, z_dir='u'):
+    elif checkSquareHeights(x, z, Data, x_len, z_len, z_dir='u') and regionCheck(x, z, x+1, z-1):
         for x, z in zip([x, x, x+1, x+1], [z, z-1, z, z-1]):
             pos = [x, y+1, z]
             addBlock(region, str(tree+'_sapling'), pos)
@@ -993,7 +1005,7 @@ def addLargeTree(region, x, y, z, Data, x_len, z_len, tree):
 
 
 def addForest(region, position, x_len, z_len, Data,
-              top_block_name, Forest_period_raster = '', ):
+              top_block_name, Forest_period_raster=''):
     global settings
     x, y, z = position
     add_tree = False
@@ -1025,7 +1037,7 @@ def autoScale(data):
     global settings
     high = max(data.max())
     if min(data.min()) == -9999:
-        low = min(min([l for l in [[i for i in data.iloc[j] if i != -9999] for j in range(len(data))]if l]))
+        low = min(min([k for k in [[i for i in data.iloc[j] if i != -9999] for j in range(len(data))]if k]))
     else:
         low = min(data.min())
     demHeight = high - low
@@ -1340,14 +1352,13 @@ def execute():
                                              time.perf_counter()-start))
                     if Data.iloc[x, z] == -9999:
                         pass
-                    elif Data.iloc[x, z] <=  water_level_scaled:
+                    elif Data.iloc[x, z] <= water_level_scaled:
                         pos = [x, 0, z]
                         addBlock(region, 'bedrock', pos)
                         for y in range(1, water_height):
                             pos = [x, y, z]
                             addBlock(region, 'water', pos)
-                    elif not settings['use_half_blocks']\
-                     or Data.iloc[x, z] % 1 == 0:
+                    elif not settings['use_half_blocks'] or Data.iloc[x, z] % 1 == 0:
                         for y in range(y_range):
                             pos = [x, y, z]
                             if y == 0:
@@ -1359,7 +1370,7 @@ def execute():
                                 addBlock(region, top_block_name, pos)
                                 if settings['use_forest'] and settings['forest_period_file'] != '':
                                     addForest(region, pos, x_len, z_len, Data, top_block_name,
-                                              Forest_period_raster = Forest_period_raster
+                                              Forest_period_raster=Forest_period_raster
                                               )
                                 elif settings['use_forest']:
                                     addForest(region, pos, x_len, z_len, Data, top_block_name)
@@ -1433,7 +1444,7 @@ if gui:
         splash.finish(widget)
         start_up_finish = time.perf_counter()
         logger.info('GUI Startup time: {:.2f}'.format(start_up_finish-start_up_start))
-        
+
         sys.exit(app.exec_())
 else:
     execute()
