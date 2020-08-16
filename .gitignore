@@ -131,3 +131,14 @@ dmypy.json
 !DEMtoMC.ini
 !Examples/*/*.mca
 test.py
+Logo/Logo_Grass_Block.svg
+Logo/Logo_Grass_Block.png
+Logo/Falnash_cropped_small.png
+Logo/Falnash_cropped_16.png
+Logo/Falnash_cropped.png
+Logo/Logo_Work_Bench.svg
+Logo/Splash_Work_Bench.svg
+.vs/DEMtoMinecraft/v16/.suo
+.vs/PythonSettings.json
+.vs/slnx.sqlite
+.vs/VSWorkspaceState.json
