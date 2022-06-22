@@ -2,7 +2,7 @@ anvil-parser==0.6.4
 frozendict==1.2
 GDAL==3.0.4
 NBT==1.5.0
-numpy==1.18.5
+numpy==1.22.0
 pandas==1.0.4
 PySide2==5.15.0
 python-dateutil==2.8.1
